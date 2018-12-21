@@ -44,6 +44,8 @@ public class CleverReachRest implements CleverReachService {
 
   public static final String COMPONENT_NAME = "rest";
 
+  private static final String REST_CONFIG_SPACE_NAME = "Configs";
+  private static final String REST_CONFIG_DOC_NAME = "CleverReachRest";
   private static final String DEFAULT_REST_URL = "https://rest.cleverreach.com/";
   private static final String PATH_VERSION = "v3/";
   private static final String PATH_LOGIN = "oauth/token.php";
@@ -91,7 +93,7 @@ public class CleverReachRest implements CleverReachService {
     Optional<BaseObject> configObj = Optional.absent();
     try {
       configObj = XWikiObjectFetcher.on(modelAccess.getDocument(
-          getXWikiPreferencesDocRef())).filter(remoteLoginClass).first();
+          getConfigDocRef())).filter(remoteLoginClass).first();
     } catch (DocumentNotExistsException dnee) {
       LOGGER.warn("Document XWikiPreferences does not exist", dnee);
     }
@@ -261,9 +263,9 @@ public class CleverReachRest implements CleverReachService {
     return (MultivaluedMap<String, String>) data;
   }
 
-  DocumentReference getXWikiPreferencesDocRef() {
-    return create(DocumentReference.class, "XWikiPreferences", create(SpaceReference.class, "XWiki",
-        modelContext.getWikiRef()));
+  DocumentReference getConfigDocRef() {
+    return create(DocumentReference.class, REST_CONFIG_DOC_NAME, create(SpaceReference.class,
+        REST_CONFIG_SPACE_NAME, modelContext.getWikiRef()));
   }
 
   void traceLogLoginResponse(Response response, String content) {
