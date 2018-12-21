@@ -1,4 +1,4 @@
-package com.synventis.cleverreach;
+package com.celements.cleverreach;
 
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;

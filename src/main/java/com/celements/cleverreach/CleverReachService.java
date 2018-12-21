@@ -1,4 +1,4 @@
-package com.synventis.cleverreach;
+package com.celements.cleverreach;
 
 import javax.validation.constraints.NotNull;
 

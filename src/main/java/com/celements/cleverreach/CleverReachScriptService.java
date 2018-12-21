@@ -1,4 +1,4 @@
-package com.synventis.cleverreach;
+package com.celements.cleverreach;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.script.service.ScriptService;

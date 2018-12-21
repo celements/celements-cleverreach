@@ -1,4 +1,4 @@
-package com.synventis.cleverreach;
+package com.celements.cleverreach;
 
 import static com.celements.model.util.References.*;
 import static com.google.common.base.Preconditions.*;
