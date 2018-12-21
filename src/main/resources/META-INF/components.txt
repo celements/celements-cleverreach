@@ -1,0 +1,2 @@
+com.synventis.cleverreach.CleverReachRest
+com.synventis.cleverreach.CleverReachScriptService
