@@ -92,8 +92,8 @@ public class CleverReachRest implements CleverReachService {
   public boolean initFromConfig() {
     Optional<BaseObject> configObj = Optional.absent();
     try {
-      configObj = XWikiObjectFetcher.on(modelAccess.getDocument(
-          getConfigDocRef())).filter(remoteLoginClass).first();
+      configObj = XWikiObjectFetcher.on(modelAccess.getDocument(getConfigDocRef())).filter(
+          remoteLoginClass).first();
     } catch (DocumentNotExistsException dnee) {
       LOGGER.warn("Document XWikiPreferences does not exist", dnee);
     }
@@ -111,18 +111,19 @@ public class CleverReachRest implements CleverReachService {
   }
 
   @Override
-  public boolean updateMailing(String mailingId, String subject, String contentHtml,
-      String contentPlain) {
+  public boolean updateMailing(MailingConfig mailingConf) {
     Mailing formData = new Mailing();
-    formData.subject = subject;
-    formData.content.html = contentHtml;
-    formData.content.text = contentPlain;
-    Response response = sendRestRequest(PATH_MAILINGS + mailingId, formData, SubmitMethod.PUT);
-    LOGGER.debug("Tagesagenda response [{}]", response);
+    formData.subject = mailingConf.getSubject();
+    formData.content.html = mailingConf.getContentHtml();
+    formData.content.text = mailingConf.getContentPlain();
+    Response response = sendRestRequest(PATH_MAILINGS + mailingConf.getId(), formData,
+        SubmitMethod.PUT);
+    LOGGER.debug("Mailing update response [{}]", response);
     if ((response != null) && response.hasEntity()) {
       String content = response.readEntity(String.class);
-      LOGGER.debug("Tagesagenda response content [{}]", content);
-      return content.contains(mailingId) && content.matches(".*\"success\".{0,1}:.{0,1}true.*");
+      LOGGER.debug("Mailing update response content [{}]", content);
+      return content.contains(mailingConf.getId()) && content.matches(
+          ".*\"success\".{0,1}:.{0,1}true.*");
     }
     return false;
   }

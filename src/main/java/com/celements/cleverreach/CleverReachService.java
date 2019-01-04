@@ -35,10 +35,9 @@ public interface CleverReachService {
   boolean initFromConfig();
 
   /**
-   * Update the Tagesagenda mailing content
+   * Update a mailing
    */
-  boolean updateMailing(String mailingId, String subject, String contentHtml,
-      String contentPlain);
+  boolean updateMailing(MailingConfig mailing);
 
   /**
    * For debugging only. Returns the logged in user.
