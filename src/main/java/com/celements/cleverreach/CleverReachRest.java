@@ -2,7 +2,6 @@ package com.celements.cleverreach;
 
 import static com.celements.model.util.References.*;
 import static com.google.common.base.Preconditions.*;
-import static com.google.common.base.Strings.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -23,10 +22,12 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+import org.xwiki.context.ExecutionContext;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 
 import com.celements.auth.classes.RemoteLoginClass;
+import com.celements.cleverreach.exception.CleverReachRequestFailedException;
 import com.celements.model.access.IModelAccessFacade;
 import com.celements.model.access.exception.DocumentNotExistsException;
 import com.celements.model.classes.ClassDefinition;
@@ -37,21 +38,23 @@ import com.sun.syndication.io.impl.Base64;
 import com.xpn.xwiki.objects.BaseObject;
 
 @Component(CleverReachRest.COMPONENT_NAME)
-@InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
+@InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
 public class CleverReachRest implements CleverReachService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CleverReachRest.class);
 
   public static final String COMPONENT_NAME = "rest";
 
+  protected static final String DEFAULT_REST_URL = "https://rest.cleverreach.com/";
   private static final String REST_CONFIG_SPACE_NAME = "Configs";
   private static final String REST_CONFIG_DOC_NAME = "CleverReachRest";
-  private static final String DEFAULT_REST_URL = "https://rest.cleverreach.com/";
   private static final String PATH_VERSION = "v3/";
   private static final String PATH_LOGIN = "oauth/token.php";
   private static final String PATH_MAILINGS = "mailings.json/";
   private static final String PATH_WHOAMI = "debug/whoami.json";
   private static final String PATH_TTL = "debug/ttl.json";
+
+  private static final String CONTEXT_CONNECTION_KEY = "clever_reach_connection";
 
   private static enum SubmitMethod {
     GET, POST, PUT, DELETE
@@ -66,52 +69,12 @@ public class CleverReachRest implements CleverReachService {
   @Requirement(RemoteLoginClass.CLASS_DEF_HINT)
   private ClassDefinition remoteLoginClass;
 
-  private String restBaseUrl;
-  private String clientId;
-  private String clientSecret;
-  private CleverReachToken token;
+  @Requirement
+  private ExecutionContext execContext;
 
   @Override
-  public boolean init(String clientId, String clientSecret) {
-    return init(DEFAULT_REST_URL, clientId, clientSecret);
-  }
-
-  @Override
-  public boolean init(String restBaseUrl, String clientId, String clientSecret) {
-    checkArgument(!isNullOrEmpty(restBaseUrl));
-    this.restBaseUrl = restBaseUrl;
-    checkArgument(!isNullOrEmpty(clientId));
-    this.clientId = clientId;
-    checkArgument(!isNullOrEmpty(clientSecret));
-    this.clientSecret = clientSecret;
-    token = new CleverReachToken(0);
-    return initRequest();
-  }
-
-  @Override
-  public boolean initFromConfig() {
-    Optional<BaseObject> configObj = Optional.absent();
-    try {
-      configObj = XWikiObjectFetcher.on(modelAccess.getDocument(getConfigDocRef())).filter(
-          remoteLoginClass).first();
-    } catch (DocumentNotExistsException dnee) {
-      LOGGER.warn("Document XWikiPreferences does not exist", dnee);
-    }
-    if (configObj.isPresent()) {
-      Optional<String> restBaseUrl = modelAccess.getFieldValue(configObj.get(),
-          RemoteLoginClass.FIELD_URL);
-      Optional<String> clientId = modelAccess.getFieldValue(configObj.get(),
-          RemoteLoginClass.FIELD_USERNAME);
-      Optional<String> clientSecret = modelAccess.getFieldValue(configObj.get(),
-          RemoteLoginClass.FIELD_PASSWORD);
-      return init(restBaseUrl.orNull(), clientId.orNull(), clientSecret.orNull());
-    }
-    LOGGER.warn("No config found on XWikiPreferences");
-    return false;
-  }
-
-  @Override
-  public boolean updateMailing(MailingConfig mailingConf) {
+  public boolean updateMailing(MailingConfig mailingConf) throws IOException {
+    checkNotNull(mailingConf);
     Mailing formData = new Mailing();
     formData.subject = mailingConf.getSubject();
     formData.content.html = mailingConf.getContentHtml();
@@ -129,41 +92,47 @@ public class CleverReachRest implements CleverReachService {
   }
 
   @Override
-  public String whoami() {
+  public String whoami() throws IOException {
     return runDebugRequest(PATH_WHOAMI);
   }
 
   @Override
-  public String ttl() {
+  public String ttl() throws IOException {
     return runDebugRequest(PATH_TTL);
   }
 
-  void initCheck() {
-    checkArgument(token != null, "CleverReachRest is not initialized!");
-  }
-
-  Response sendRestRequest(String path, Object data, SubmitMethod method) {
-    if (initRequest()) {
+  Response sendRestRequest(String path, Object data, SubmitMethod method) throws IOException {
+    CleverReachConnection connection = getConnection();
+    if (connection.isConnected()) {
+      CleverReachToken token = connection.getToken().get();
       method = (method != null) ? method : SubmitMethod.POST;
       String authHeader = token.getTokenType() + " " + token.getToken();
       if (data instanceof MultivaluedMap) {
         getMultivalueMapFromOjb(data).add("token", token.getToken());
       }
-      Response response = sendRequest(PATH_VERSION + path, data, authHeader, method);
+      Response response = sendRequest(PATH_VERSION + path, data, authHeader, method, connection);
       if (response.getStatus() == 200) {
         return response;
       } else {
-        LOGGER.warn("Request response status != 200. Response [{}]", response);
+        LOGGER.trace("Request response status != 200. Response [{}]", response);
         if (response.hasEntity()) {
-          LOGGER.warn("Response content [{}]", response.readEntity(String.class));
+          LOGGER.trace("Response content [{}]", response.readEntity(String.class));
         }
+        throw new CleverReachRequestFailedException("Response code status != 200", response);
       }
+    } else {
+      throw new CleverReachRequestFailedException("Failed to connect", null);
     }
-    return null;
   }
 
-  Response sendRequest(String path, Object data, String authHeader, SubmitMethod method) {
-    WebTarget target = ClientBuilder.newClient().target(restBaseUrl).path(path);
+  Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
+      CleverReachConnection connection) {
+    return sendRequest(path, data, authHeader, method, connection.getBaseUrl());
+  }
+
+  Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
+      String baseUrl) {
+    WebTarget target = ClientBuilder.newClient().target(baseUrl).path(path);
     addGetParameters(data, target, method);
     Builder request = target.request().header("Authorization", authHeader);
     if (method == SubmitMethod.GET) {
@@ -177,39 +146,13 @@ public class CleverReachRest implements CleverReachService {
     return request.post(getRequestDataEntity(data));
   }
 
-  boolean initRequest() {
-    if (!token.isValid()) {
-      LOGGER.debug("initializing login");
-      login();
-    }
-    return token.isValid();
-  }
-
-  void login() {
-    MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
-    formData.putSingle("grant_type", "client_credentials");
-    String authHeader = "Basic " + Base64.encode(clientId + ":" + clientSecret);
-    Response response = sendRequest(PATH_LOGIN, formData, authHeader, SubmitMethod.POST);
-    boolean hasContent = response.hasEntity();
-    String content = null;
-    if (hasContent) {
-      // readEntity closes the response stream, so it can only be read once
-      content = response.readEntity(String.class);
-    }
-    traceLogLoginResponse(response, content);
-    if (hasContent) {
-      initializeToken(response, content);
-    } else {
-      LOGGER.warn("Unable to connect and receive token. Response [{}]", response);
-    }
-  }
-
-  void initializeToken(Response response, String jsonResponse) {
+  CleverReachToken initializeToken(Response response, String jsonResponse) {
     ObjectMapper objMapper = new ObjectMapper();
     try {
-      token = objMapper.readValue(jsonResponse.getBytes(), CleverReachToken.class);
+      CleverReachToken token = objMapper.readValue(jsonResponse.getBytes(), CleverReachToken.class);
       if (token.isValid()) {
         LOGGER.debug("new token received [{}]", token);
+        return token;
       } else {
         LOGGER.warn("Unable to receive token. Response [{}]", response);
       }
@@ -221,10 +164,67 @@ public class CleverReachRest implements CleverReachService {
         LOGGER.error("Exception Reason", ioe);
       }
     }
+    return null;
   }
 
-  String runDebugRequest(String path) {
-    initCheck();
+  CleverReachConnection getConnection() throws CleverReachRequestFailedException {
+    CleverReachConnection cachedConnection = (CleverReachConnection) execContext.getProperty(
+        CONTEXT_CONNECTION_KEY);
+    if ((null == cachedConnection) || !cachedConnection.isConnected()) {
+      Optional<BaseObject> configObj = Optional.absent();
+      try {
+        configObj = XWikiObjectFetcher.on(modelAccess.getDocument(getConfigDocRef())).filter(
+            remoteLoginClass).first();
+      } catch (DocumentNotExistsException dnee) {
+        LOGGER.warn("Document XWikiPreferences does not exist", dnee);
+      }
+      cachedConnection = buildConnection(configObj);
+      execContext.setProperty(CONTEXT_CONNECTION_KEY, cachedConnection);
+    }
+    return cachedConnection;
+  }
+
+  CleverReachConnection buildConnection(Optional<BaseObject> configObj)
+      throws CleverReachRequestFailedException {
+    if (configObj.isPresent()) {
+      Optional<String> restBaseUrl = modelAccess.getFieldValue(configObj.get(),
+          RemoteLoginClass.FIELD_URL);
+      Optional<String> clientId = modelAccess.getFieldValue(configObj.get(),
+          RemoteLoginClass.FIELD_USERNAME);
+      Optional<String> clientSecret = modelAccess.getFieldValue(configObj.get(),
+          RemoteLoginClass.FIELD_PASSWORD);
+      if (clientId.isPresent() && clientSecret.isPresent()) {
+        return new CleverReachConnection(restBaseUrl.orNull(), login(restBaseUrl.orNull(),
+            clientId.get(), clientSecret.get()));
+      }
+    }
+    LOGGER.warn("No config found on {}.{}", REST_CONFIG_SPACE_NAME, REST_CONFIG_DOC_NAME);
+    return new CleverReachConnection();
+  }
+
+  CleverReachToken login(String restBaseUrl, String clientId, String clientSecret)
+      throws CleverReachRequestFailedException {
+    MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    formData.putSingle("grant_type", "client_credentials");
+    String authHeader = "Basic " + Base64.encode(clientId + ":" + clientSecret);
+    Response response = sendRequest(PATH_LOGIN, formData, authHeader, SubmitMethod.POST,
+        restBaseUrl);
+    boolean hasContent = response.hasEntity();
+    String content = null;
+    if (hasContent) {
+      // readEntity closes the response stream, so it can only be read once
+      content = response.readEntity(String.class);
+    }
+    traceLogLoginResponse(response, content);
+    if (hasContent) {
+      return initializeToken(response, content);
+    } else {
+      throw new CleverReachRequestFailedException(
+          "Unable to connect and receive token. Response [{}]", response);
+    }
+  }
+
+  String runDebugRequest(String path) throws IOException {
     Response response = sendRestRequest(path, new MultivaluedHashMap<String, String>(),
         SubmitMethod.GET);
     if ((response != null) && (response.getStatus() == 200) && response.hasEntity()) {

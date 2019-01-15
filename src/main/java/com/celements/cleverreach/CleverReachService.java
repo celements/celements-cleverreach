@@ -1,5 +1,7 @@
 package com.celements.cleverreach;
 
+import java.io.IOException;
+
 import javax.validation.constraints.NotNull;
 
 import org.xwiki.component.annotation.ComponentRole;
@@ -8,51 +10,31 @@ import org.xwiki.component.annotation.ComponentRole;
 public interface CleverReachService {
 
   /**
-   * Initialise the CleverReach Service
-   *
-   * @param clientId
-   *          Client application ID
-   * @param clientSecret
-   *          Client application shared secret
-   */
-  boolean init(@NotNull String clientId, @NotNull String clientSecret);
-
-  /**
-   * Initialise the CleverReach Service
-   *
-   * @param restBaseUrl
-   *          Base URL used for all requests
-   * @param clientId
-   *          Client application ID
-   * @param clientSecret
-   *          Client application shared secret
-   */
-  boolean init(@NotNull String restBaseUrl, @NotNull String clientId, @NotNull String clientSecret);
-
-  /**
-   * Initialise loading the config from XWikiPreferences
-   */
-  boolean initFromConfig();
-
-  /**
    * Update a mailing
+   *
+   * @param mailing
+   *          The mailing needing an update
+   * @return true if updated successfully
+   * @throws IOException
    */
-  boolean updateMailing(MailingConfig mailing);
+  boolean updateMailing(@NotNull MailingConfig mailing) throws IOException;
 
   /**
    * For debugging only. Returns the logged in user.
    *
    * @return The application creator info as JSON
+   * @throws IOException
    */
   @NotNull
-  String whoami();
+  String whoami() throws IOException;
 
   /**
    * Get the TTL for the token.
    *
    * @return The TTL and Expiration date as JSON
+   * @throws IOException
    */
   @NotNull
-  String ttl();
+  String ttl() throws IOException;
 
 }
