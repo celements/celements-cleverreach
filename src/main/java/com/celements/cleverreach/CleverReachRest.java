@@ -46,9 +46,9 @@ public class CleverReachRest implements CleverReachService {
 
   public static final String COMPONENT_NAME = "rest";
 
+  public static final String REST_CONFIG_SPACE_NAME = "Configs";
+  public static final String REST_CONFIG_DOC_NAME = "CleverReachRest";
   protected static final String DEFAULT_REST_URL = "https://rest.cleverreach.com/";
-  static final String REST_CONFIG_SPACE_NAME = "Configs";
-  static final String REST_CONFIG_DOC_NAME = "CleverReachRest";
   static final String PATH_VERSION = "v3/";
   static final String PATH_LOGIN = "oauth/token.php";
   static final String PATH_MAILINGS = "mailings.json/";
