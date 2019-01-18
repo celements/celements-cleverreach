@@ -1,2 +1,2 @@
-com.synventis.cleverreach.CleverReachRest
-com.synventis.cleverreach.CleverReachScriptService
+com.celements.cleverreach.CleverReachRest
+com.celements.cleverreach.CleverReachScriptService

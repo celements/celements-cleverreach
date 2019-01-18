@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -22,7 +23,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.context.ExecutionContext;
+import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 
@@ -46,17 +47,17 @@ public class CleverReachRest implements CleverReachService {
   public static final String COMPONENT_NAME = "rest";
 
   protected static final String DEFAULT_REST_URL = "https://rest.cleverreach.com/";
-  private static final String REST_CONFIG_SPACE_NAME = "Configs";
-  private static final String REST_CONFIG_DOC_NAME = "CleverReachRest";
-  private static final String PATH_VERSION = "v3/";
-  private static final String PATH_LOGIN = "oauth/token.php";
-  private static final String PATH_MAILINGS = "mailings.json/";
-  private static final String PATH_WHOAMI = "debug/whoami.json";
-  private static final String PATH_TTL = "debug/ttl.json";
+  static final String REST_CONFIG_SPACE_NAME = "Configs";
+  static final String REST_CONFIG_DOC_NAME = "CleverReachRest";
+  static final String PATH_VERSION = "v3/";
+  static final String PATH_LOGIN = "oauth/token.php";
+  static final String PATH_MAILINGS = "mailings.json/";
+  static final String PATH_WHOAMI = "debug/whoami.json";
+  static final String PATH_TTL = "debug/ttl.json";
 
-  private static final String CONTEXT_CONNECTION_KEY = "clever_reach_connection";
+  static final String CONTEXT_CONNECTION_KEY = "clever_reach_connection";
 
-  private static enum SubmitMethod {
+  static enum SubmitMethod {
     GET, POST, PUT, DELETE
   };
 
@@ -70,7 +71,9 @@ public class CleverReachRest implements CleverReachService {
   private ClassDefinition remoteLoginClass;
 
   @Requirement
-  private ExecutionContext execContext;
+  private Execution execution;
+
+  Client injectedClient;
 
   @Override
   public boolean updateMailing(MailingConfig mailingConf) throws IOException {
@@ -125,27 +128,6 @@ public class CleverReachRest implements CleverReachService {
     }
   }
 
-  Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
-      CleverReachConnection connection) {
-    return sendRequest(path, data, authHeader, method, connection.getBaseUrl());
-  }
-
-  Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
-      String baseUrl) {
-    WebTarget target = ClientBuilder.newClient().target(baseUrl).path(path);
-    addGetParameters(data, target, method);
-    Builder request = target.request().header("Authorization", authHeader);
-    if (method == SubmitMethod.GET) {
-      return request.get();
-    } else if (method == SubmitMethod.PUT) {
-      return request.put(getRequestDataEntity(data));
-    } else if (method == SubmitMethod.DELETE) {
-      return request.delete();
-    }
-    // Default to SubmitMethod.POST
-    return request.post(getRequestDataEntity(data));
-  }
-
   CleverReachToken initializeToken(Response response, String jsonResponse) {
     ObjectMapper objMapper = new ObjectMapper();
     try {
@@ -168,7 +150,7 @@ public class CleverReachRest implements CleverReachService {
   }
 
   CleverReachConnection getConnection() throws CleverReachRequestFailedException {
-    CleverReachConnection cachedConnection = (CleverReachConnection) execContext.getProperty(
+    CleverReachConnection cachedConnection = (CleverReachConnection) execution.getContext().getProperty(
         CONTEXT_CONNECTION_KEY);
     if ((null == cachedConnection) || !cachedConnection.isConnected()) {
       Optional<BaseObject> configObj = Optional.absent();
@@ -179,7 +161,7 @@ public class CleverReachRest implements CleverReachService {
         LOGGER.warn("Document XWikiPreferences does not exist", dnee);
       }
       cachedConnection = buildConnection(configObj);
-      execContext.setProperty(CONTEXT_CONNECTION_KEY, cachedConnection);
+      execution.getContext().setProperty(CONTEXT_CONNECTION_KEY, cachedConnection);
     }
     return cachedConnection;
   }
@@ -222,6 +204,34 @@ public class CleverReachRest implements CleverReachService {
       throw new CleverReachRequestFailedException(
           "Unable to connect and receive token. Response [{}]", response);
     }
+  }
+
+  Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
+      CleverReachConnection connection) {
+    return sendRequest(path, data, authHeader, method, connection.getBaseUrl());
+  }
+
+  Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
+      String baseUrl) {
+    WebTarget target = createClient().target(baseUrl).path(path);
+    addGetParameters(data, target, method);
+    Builder request = target.request().header("Authorization", authHeader);
+    if (method == SubmitMethod.GET) {
+      return request.get();
+    } else if (method == SubmitMethod.PUT) {
+      return request.put(getRequestDataEntity(data));
+    } else if (method == SubmitMethod.DELETE) {
+      return request.delete();
+    }
+    // Default to SubmitMethod.POST
+    return request.post(getRequestDataEntity(data));
+  }
+
+  Client createClient() {
+    if (injectedClient != null) {
+      return injectedClient;
+    }
+    return ClientBuilder.newClient();
   }
 
   String runDebugRequest(String path) throws IOException {
