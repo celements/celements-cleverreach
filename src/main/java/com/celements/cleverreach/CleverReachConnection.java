@@ -39,7 +39,7 @@ public class CleverReachConnection {
     return Optional.fromNullable(token);
   }
 
-  public void setToken(CleverReachToken token) {
+  public void setToken(@Nullable CleverReachToken token) {
     this.token = token;
   }
 

@@ -88,8 +88,14 @@ public class CleverReachRest implements CleverReachService {
     if ((response != null) && response.hasEntity()) {
       String content = response.readEntity(String.class);
       LOGGER.debug("Mailing update response content [{}]", content);
-      return content.contains(mailingConf.getId()) && content.matches(
-          ".*\"success\".{0,1}:.{0,1}true.*");
+      if (content.contains(mailingConf.getId()) && content.matches(
+          ".*\"success\".{0,1}:.{0,1}true.*")) {
+        return true;
+      }
+      LOGGER.warn("Mailing update not successful. Response content is [{}]", content);
+    } else {
+      LOGGER.warn("Mailing update failed with response [{}] and response hasEntity [{}]", response,
+          (response != null) ? response.hasEntity() : false);
     }
     return false;
   }
@@ -216,15 +222,16 @@ public class CleverReachRest implements CleverReachService {
     WebTarget target = createClient().target(baseUrl).path(path);
     addGetParameters(data, target, method);
     Builder request = target.request().header("Authorization", authHeader);
-    if (method == SubmitMethod.GET) {
-      return request.get();
-    } else if (method == SubmitMethod.PUT) {
-      return request.put(getRequestDataEntity(data));
-    } else if (method == SubmitMethod.DELETE) {
-      return request.delete();
+    switch (method) {
+      case GET:
+        return request.get();
+      case PUT:
+        return request.put(getRequestDataEntity(data));
+      case DELETE:
+        return request.delete();
+      default: // Default to SubmitMethod.POST
+        return request.post(getRequestDataEntity(data));
     }
-    // Default to SubmitMethod.POST
-    return request.post(getRequestDataEntity(data));
   }
 
   Client createClient() {

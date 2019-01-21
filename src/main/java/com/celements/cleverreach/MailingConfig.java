@@ -37,7 +37,6 @@ public class MailingConfig {
     }
 
     public MailingConfig build() {
-      checkState(!isNullOrEmpty(id));
       return new MailingConfig(id, subject, contentHtml, contentPlain);
     }
 
@@ -50,6 +49,7 @@ public class MailingConfig {
 
   private MailingConfig(@NotNull String id, String subject, String contentHtml,
       String contentPlain) {
+    checkArgument(!isNullOrEmpty(id));
     this.id = id;
     this.subject = subject;
     this.contentHtml = contentHtml;
