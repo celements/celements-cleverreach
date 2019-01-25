@@ -27,7 +27,7 @@ public class MailingConfigTest extends AbstractComponentTest {
     try {
       new MailingConfig.Builder().build();
       fail("Exception expected: Missing ID");
-    } catch (IllegalStateException ise) {
+    } catch (IllegalArgumentException iae) {
       // expected result
     }
   }
