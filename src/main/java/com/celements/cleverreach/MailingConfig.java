@@ -3,6 +3,7 @@ package com.celements.cleverreach;
 import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Strings.*;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.validation.constraints.NotNull;
 
@@ -21,23 +22,23 @@ public class MailingConfig {
       return this;
     }
 
-    public Builder setSubject(@NotNull String subject) {
+    public Builder setSubject(@Nullable String subject) {
       this.subject = !isNullOrEmpty(subject) ? subject : null;
       return this;
     }
 
-    public Builder setContentHtml(@NotNull String contentHtml) {
+    public Builder setContentHtml(@Nullable String contentHtml) {
       this.contentHtml = !isNullOrEmpty(contentHtml) ? contentHtml : null;
       return this;
     }
 
-    public Builder setContentPlain(@NotNull String contentPlain) {
+    public Builder setContentPlain(@Nullable String contentPlain) {
       this.contentPlain = !isNullOrEmpty(contentPlain) ? contentPlain : null;
       return this;
     }
 
     public MailingConfig build() {
-      return new MailingConfig(id, subject, contentHtml, contentPlain);
+      return new MailingConfig(this);
     }
 
   }
@@ -47,28 +48,27 @@ public class MailingConfig {
   private final String contentHtml;
   private final String contentPlain;
 
-  private MailingConfig(@NotNull String id, String subject, String contentHtml,
-      String contentPlain) {
-    checkArgument(!isNullOrEmpty(id));
-    this.id = id;
-    this.subject = subject;
-    this.contentHtml = contentHtml;
-    this.contentPlain = contentPlain;
+  private MailingConfig(Builder builder) {
+    checkArgument(!isNullOrEmpty(builder.id));
+    id = builder.id;
+    subject = builder.subject;
+    contentHtml = builder.contentHtml;
+    contentPlain = builder.contentPlain;
   }
 
-  public String getId() {
+  public @NotNull String getId() {
     return id;
   }
 
-  public String getSubject() {
+  public @Nullable String getSubject() {
     return subject;
   }
 
-  public String getContentHtml() {
+  public @Nullable String getContentHtml() {
     return contentHtml;
   }
 
-  public String getContentPlain() {
+  public @Nullable String getContentPlain() {
     return contentPlain;
   }
 
