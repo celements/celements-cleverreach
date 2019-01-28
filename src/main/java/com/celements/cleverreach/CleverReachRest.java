@@ -6,8 +6,6 @@ import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
@@ -73,7 +71,8 @@ public class CleverReachRest implements CleverReachService {
   @Requirement
   private Execution execution;
 
-  Client injectedClient;
+  @Requirement
+  private IRestClientFactoryRole clientFactory;
 
   @Override
   public boolean updateMailing(MailingConfig mailingConf) throws IOException {
@@ -219,7 +218,7 @@ public class CleverReachRest implements CleverReachService {
 
   Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
       String baseUrl) {
-    WebTarget target = createClient().target(baseUrl).path(path);
+    WebTarget target = clientFactory.newClient().target(baseUrl).path(path);
     addGetParameters(data, target, method);
     Builder request = target.request().header("Authorization", authHeader);
     switch (method) {
@@ -232,13 +231,6 @@ public class CleverReachRest implements CleverReachService {
       default: // Default to SubmitMethod.POST
         return request.post(getRequestDataEntity(data));
     }
-  }
-
-  Client createClient() {
-    if (injectedClient != null) {
-      return injectedClient;
-    }
-    return ClientBuilder.newClient();
   }
 
   String runDebugRequest(String path) throws IOException {

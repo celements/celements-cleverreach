@@ -23,9 +23,11 @@ import com.xpn.xwiki.web.Utils;
 public class CleverReachRestTest extends AbstractComponentTest {
 
   private CleverReachRest rest;
+  private IRestClientFactoryRole clientBuilder;
 
   @Before
-  public void setUp_CleverReachRestTest() {
+  public void setUp_CleverReachRestTest() throws Exception {
+    clientBuilder = registerComponentMock(IRestClientFactoryRole.class);
     rest = (CleverReachRest) Utils.getComponent(CleverReachService.class,
         CleverReachRest.COMPONENT_NAME);
   }
@@ -35,9 +37,10 @@ public class CleverReachRestTest extends AbstractComponentTest {
     String baseUrl = "http://www.test-base-url.test";
     String path = "/test/path";
     String token = "token123";
-    rest.injectedClient = createMockAndAddToDefault(Client.class);
+    Client client = createMockAndAddToDefault(Client.class);
     WebTarget target = createMockAndAddToDefault(WebTarget.class);
-    expect(rest.injectedClient.target(baseUrl)).andReturn(target);
+    expect(clientBuilder.newClient()).andReturn(client);
+    expect(client.target(baseUrl)).andReturn(target);
     expect(target.path(path)).andReturn(target);
     Builder builder = createMockAndAddToDefault(Builder.class);
     expect(target.request()).andReturn(builder);
