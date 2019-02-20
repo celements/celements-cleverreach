@@ -37,21 +37,9 @@
     </dependency>
   </dependencies>
   <scm>
-    <connection>scm:git:git@github.com:synventis/syn-cel.git</connection>
-    <developerConnection>scm:git:git@github.com:synventis/syn-cel.git</developerConnection>
-    <url>https://github.com/synventis/syn-cel</url>
+    <connection>scm:git:git@github.com:celements/celements-core.git</connection>
+    <developerConnection>scm:git:git@github.com:celements/celements-core.git</developerConnection>
+    <url>https://github.com/celements/celements-cleverreach</url>
     <tag>HEAD</tag>
   </scm>
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ssh-synventis-snapshot-repository</id>
-      <url>scpexe://maven.synventis.ch/var/www-synventis/snapshots</url>
-      <uniqueVersion>true</uniqueVersion>
-    </snapshotRepository>
-    <repository>
-      <id>ssh-synventis-release-repository</id>
-      <url>scpexe://maven.synventis.ch/var/www-synventis/releases</url>
-      <uniqueVersion>true</uniqueVersion>
-    </repository>
-  </distributionManagement>
 </project>
