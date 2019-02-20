@@ -37,8 +37,8 @@
     </dependency>
   </dependencies>
   <scm>
-    <connection>scm:git:git@github.com:celements/celements-core.git</connection>
-    <developerConnection>scm:git:git@github.com:celements/celements-core.git</developerConnection>
+    <connection>scm:git:git@github.com:celements/celements-cleverreach.git</connection>
+    <developerConnection>scm:git:git@github.com:celements/celements-cleverreach.git</developerConnection>
     <url>https://github.com/celements/celements-cleverreach</url>
     <tag>HEAD</tag>
   </scm>
