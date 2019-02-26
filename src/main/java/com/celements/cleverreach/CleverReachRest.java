@@ -109,6 +109,12 @@ public class CleverReachRest implements CleverReachService {
     return runDebugRequest(PATH_TTL);
   }
 
+  @Override
+  public DocumentReference getConfigDocRef() {
+    return create(DocumentReference.class, REST_CONFIG_DOC_NAME, create(SpaceReference.class,
+        REST_CONFIG_SPACE_NAME, modelContext.getWikiRef()));
+  }
+
   Response sendRestRequest(String path, Object data, SubmitMethod method) throws IOException {
     CleverReachConnection connection = getConnection();
     if (connection.isConnected()) {
@@ -271,11 +277,6 @@ public class CleverReachRest implements CleverReachService {
   @SuppressWarnings("unchecked")
   MultivaluedMap<String, String> getMultivalueMapFromOjb(Object data) {
     return (MultivaluedMap<String, String>) data;
-  }
-
-  DocumentReference getConfigDocRef() {
-    return create(DocumentReference.class, REST_CONFIG_DOC_NAME, create(SpaceReference.class,
-        REST_CONFIG_SPACE_NAME, modelContext.getWikiRef()));
   }
 
   void traceLogLoginResponse(Response response, String content) {
