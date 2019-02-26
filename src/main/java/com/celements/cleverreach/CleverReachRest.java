@@ -79,7 +79,7 @@ public class CleverReachRest implements CleverReachService {
     checkNotNull(mailingConf);
     Mailing formData = new Mailing();
     formData.subject = mailingConf.getSubject();
-    formData.content.html = mailingConf.getContentHtml();
+    formData.content.html = mailingConf.getContentHtmlCssInlined();
     formData.content.text = mailingConf.getContentPlain();
     Response response = sendRestRequest(PATH_MAILINGS + mailingConf.getId(), formData,
         SubmitMethod.PUT);
