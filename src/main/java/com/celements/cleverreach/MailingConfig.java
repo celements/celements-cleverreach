@@ -10,6 +10,8 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.validation.constraints.NotNull;
 
+import com.celements.cleverreach.util.CssInliner;
+
 @Immutable
 public class MailingConfig {
 
@@ -82,8 +84,7 @@ public class MailingConfig {
   }
 
   public @Nullable String getContentHtmlCssInlined() {
-    // TODO implement
-    return getContentHtml();
+    return CssInliner.inline(getContentHtml(), css.toString());
   }
 
   public @Nullable String getContentPlain() {
