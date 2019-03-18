@@ -21,7 +21,7 @@ public class MailingConfig {
     private String subject;
     private String contentHtml;
     private String contentPlain;
-    private List<Byte[]> css = new ArrayList<>();
+    private List<String> css = new ArrayList<>();
 
     public Builder setId(@NotNull String id) {
       this.id = !isNullOrEmpty(id) ? id : null;
@@ -43,7 +43,7 @@ public class MailingConfig {
       return this;
     }
 
-    public Builder addCssForInlining(@Nullable Byte[] cssFile) {
+    public Builder addCssForInlining(@Nullable String cssFile) {
       if (cssFile != null) {
         css.add(cssFile);
       }
@@ -60,7 +60,7 @@ public class MailingConfig {
   private final String subject;
   private final String contentHtml;
   private final String contentPlain;
-  private final List<Byte[]> css;
+  private final List<String> css;
 
   private MailingConfig(Builder builder) {
     checkArgument(!isNullOrEmpty(builder.id));
@@ -84,14 +84,14 @@ public class MailingConfig {
   }
 
   public @Nullable String getContentHtmlCssInlined() {
-    return CssInliner.inline(getContentHtml(), css.toString());
+    return CssInliner.inline(getContentHtml(), css);
   }
 
   public @Nullable String getContentPlain() {
     return contentPlain;
   }
 
-  public @NotNull List<Byte[]> getCssForInlining() {
+  public @NotNull List<String> getCssForInlining() {
     return css;
   }
 }

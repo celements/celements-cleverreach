@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -30,6 +31,10 @@ public class CssInliner {
   private static final Logger LOGGER = LoggerFactory.getLogger(CssInliner.class);
 
   private static final String STYLE = "style";
+
+  public static @NotNull String inline(@NotNull String html, @NotNull List<String> cssList) {
+    return inline(html, String.join("\n", cssList));
+  }
 
   public static @NotNull String inline(@NotNull String html, @NotNull String css) {
     checkNotNull(html);
