@@ -28,16 +28,18 @@ import io.sf.carte.doc.dom4j.XHTMLDocumentFactory;
 import io.sf.carte.doc.xml.dtd.DefaultEntityResolver;
 
 @Component
-public class CssInliner {
+public class DefaultCssInliner implements CssInliner {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CssInliner.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCssInliner.class);
 
   private static final String STYLE = "style";
 
+  @Override
   public @NotNull String inline(@NotNull String html, @NotNull List<String> cssList) {
     return inline(html, String.join("\n", cssList));
   }
 
+  @Override
   public @NotNull String inline(@NotNull String html, @NotNull String css) {
     checkNotNull(html);
     checkNotNull(css);

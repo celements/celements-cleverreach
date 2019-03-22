@@ -12,18 +12,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.celements.common.test.AbstractComponentTest;
+import com.xpn.xwiki.web.Utils;
 
 public class CssInlinerTest extends AbstractComponentTest {
 
+  private CssInliner cssInliner;
+
   @Before
   public void setUp_CssInlinerTest() {
-
+    cssInliner = Utils.getComponent(CssInliner.class);
   }
 
   @Test
   public void testInline_null() {
     try {
-      CssInliner.inline(null, "");
+      cssInliner.inline(null, "");
       fail("Expecting NPE");
     } catch (NullPointerException npe) {
       // expected outcome
@@ -33,7 +36,7 @@ public class CssInlinerTest extends AbstractComponentTest {
   @Test
   public void testInline_noStyles() {
     try {
-      CssInliner.inline("<div></div>", (String) null);
+      cssInliner.inline("<div></div>", (String) null);
       fail("Expecting NPE");
     } catch (NullPointerException npe) {
       // expected outcome
@@ -44,14 +47,14 @@ public class CssInlinerTest extends AbstractComponentTest {
   public void testInline_styleFile() {
     String simpleStyle = "div {\n  display: none;\n  padding-top: 3px;\n}";
     String expect = "padding-top: 3px";
-    String result = CssInliner.inline(
-        "<!DOCTYPE html><html><head></head><body><div></div></body></html>", simpleStyle);
+    String result = cssInliner.inline("<!DOCTYPE html><html><head></head><body><div></div></body>"
+        + "</html>", simpleStyle);
     assertTrue(getExpectationMessage(expect, result), result.contains(expect));
   }
 
   @Test
   public void testInline_styleFiles() throws Exception {
-    String result = CssInliner.inline(fileToString("/test.html"), Arrays.asList(fileToString(
+    String result = cssInliner.inline(fileToString("/test.html"), Arrays.asList(fileToString(
         "/testStyles1.css"), fileToString("/testStyles2.css")));
     String expect = "background-color: #f00;";
     assertTrue(getExpectationMessage(expect, result), checkInResult(result, "body", null, expect));

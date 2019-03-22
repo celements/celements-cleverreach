@@ -11,6 +11,7 @@ import javax.annotation.concurrent.Immutable;
 import javax.validation.constraints.NotNull;
 
 import com.celements.cleverreach.util.CssInliner;
+import com.xpn.xwiki.web.Utils;
 
 @Immutable
 public class MailingConfig {
@@ -84,7 +85,7 @@ public class MailingConfig {
   }
 
   public @Nullable String getContentHtmlCssInlined() {
-    return CssInliner.inline(getContentHtml(), css);
+    return getCssInliner().inline(getContentHtml(), css);
   }
 
   public @Nullable String getContentPlain() {
@@ -93,5 +94,9 @@ public class MailingConfig {
 
   public @NotNull List<String> getCssForInlining() {
     return css;
+  }
+
+  private CssInliner getCssInliner() {
+    return Utils.getComponent(CssInliner.class);
   }
 }
