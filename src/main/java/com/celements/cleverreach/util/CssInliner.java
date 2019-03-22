@@ -20,23 +20,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.css.CSSStyleDeclaration;
 import org.xml.sax.InputSource;
+import org.xwiki.component.annotation.Component;
 
 import io.sf.carte.doc.dom4j.CSSStylableElement;
 import io.sf.carte.doc.dom4j.XHTMLDocument;
 import io.sf.carte.doc.dom4j.XHTMLDocumentFactory;
 import io.sf.carte.doc.xml.dtd.DefaultEntityResolver;
 
+@Component
 public class CssInliner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CssInliner.class);
 
   private static final String STYLE = "style";
 
-  public static @NotNull String inline(@NotNull String html, @NotNull List<String> cssList) {
+  public @NotNull String inline(@NotNull String html, @NotNull List<String> cssList) {
     return inline(html, String.join("\n", cssList));
   }
 
-  public static @NotNull String inline(@NotNull String html, @NotNull String css) {
+  public @NotNull String inline(@NotNull String html, @NotNull String css) {
     checkNotNull(html);
     checkNotNull(css);
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
@@ -53,7 +55,7 @@ public class CssInliner {
     }
   }
 
-  static XHTMLDocument prepareInput(String html) throws DocumentException {
+  XHTMLDocument prepareInput(String html) throws DocumentException {
     Reader re = new StringReader(html);
     InputSource source = new InputSource(re);
     SAXReader reader = new SAXReader(XHTMLDocumentFactory.getInstance());
@@ -62,7 +64,7 @@ public class CssInliner {
     return document;
   }
 
-  static String prepareOutput(XHTMLDocument document) throws IOException {
+  String prepareOutput(XHTMLDocument document) throws IOException {
     OutputFormat outputFormat = new OutputFormat("", false, "UTF-8");
     StringWriter out = new StringWriter();
     XMLWriter writer = new XMLWriter(out, outputFormat);
@@ -71,7 +73,7 @@ public class CssInliner {
     return result;
   }
 
-  static void applyInlineStyle(Element element) {
+  void applyInlineStyle(Element element) {
     int nodeCount = element.nodeCount();
     for (int i = 0; i < nodeCount; i++) {
       Node node = element.node(i);
