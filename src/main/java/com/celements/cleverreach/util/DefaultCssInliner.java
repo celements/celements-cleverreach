@@ -51,8 +51,8 @@ public class DefaultCssInliner implements CssInliner {
       String result = prepareOutput(document);
       LOGGER.trace("HTML with CSS INLINED [{}]", result);
       return result;
-    } catch (Exception e) {
-      LOGGER.warn("Failed to apply CSS [{}] to HTML [{}]", css, html, e);
+    } catch (DocumentException | IOException excp) {
+      LOGGER.warn("Failed to apply CSS [{}] to HTML [{}]", css, html, excp);
       return html;
     }
   }
