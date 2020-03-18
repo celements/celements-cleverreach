@@ -10,7 +10,10 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.validation.constraints.NotNull;
 
+import com.celements.cleverreach.CleverReachService.ServerClass;
+import com.celements.cleverreach.exception.CssInlineException;
 import com.celements.cleverreach.util.CssInliner;
+import com.google.common.base.Strings;
 import com.xpn.xwiki.web.Utils;
 
 @Immutable
@@ -22,6 +25,10 @@ public class MailingConfig {
     private String subject;
     private String contentHtml;
     private String contentPlain;
+    private ServerClass serverClass;
+    private String referenceUserId;
+    private String referenceGroupId;
+    private String referenceAttributeId;
     private List<String> css = new ArrayList<>();
 
     public Builder setId(@NotNull String id) {
@@ -44,6 +51,30 @@ public class MailingConfig {
       return this;
     }
 
+    public Builder setServerClass(@NotNull ServerClass serverClass) {
+      checkNotNull(serverClass);
+      this.serverClass = serverClass;
+      return this;
+    }
+
+    public Builder setReferenceUserId(@NotNull String referenceUserId) {
+      checkArgument(!Strings.isNullOrEmpty(referenceUserId));
+      this.referenceUserId = referenceUserId;
+      return this;
+    }
+
+    public Builder setReferenceGroupId(@NotNull String referenceGroupId) {
+      checkArgument(!Strings.isNullOrEmpty(referenceGroupId));
+      this.referenceGroupId = referenceGroupId;
+      return this;
+    }
+
+    public Builder setReferenceAttributeId(@NotNull String referenceAttributeId) {
+      checkArgument(!Strings.isNullOrEmpty(referenceAttributeId));
+      this.referenceAttributeId = referenceAttributeId;
+      return this;
+    }
+
     public Builder addCssForInlining(@Nullable String cssFile) {
       if (cssFile != null) {
         css.add(cssFile);
@@ -61,6 +92,10 @@ public class MailingConfig {
   private final String subject;
   private final String contentHtml;
   private final String contentPlain;
+  private final ServerClass serverClass;
+  private final String referenceUserId;
+  private final String referenceGroupId;
+  private final String referenceAttributeId;
   private final List<String> css;
 
   private MailingConfig(Builder builder) {
@@ -70,6 +105,10 @@ public class MailingConfig {
     contentHtml = builder.contentHtml;
     contentPlain = builder.contentPlain;
     css = builder.css;
+    serverClass = builder.serverClass;
+    referenceUserId = builder.referenceUserId;
+    referenceGroupId = builder.referenceGroupId;
+    referenceAttributeId = builder.referenceAttributeId;
   }
 
   public @NotNull String getId() {
@@ -84,7 +123,7 @@ public class MailingConfig {
     return contentHtml;
   }
 
-  public @Nullable String getContentHtmlCssInlined() {
+  public @Nullable String getContentHtmlCssInlined() throws CssInlineException {
     return getCssInliner().inline(getContentHtml(), css);
   }
 
@@ -94,6 +133,22 @@ public class MailingConfig {
 
   public @NotNull List<String> getCssForInlining() {
     return css;
+  }
+
+  public @NotNull ServerClass getServerClass() {
+    return serverClass;
+  }
+
+  public @NotNull String getReferenceGroupId() {
+    return referenceUserId;
+  }
+
+  public @NotNull String getReferenceAttributeId() {
+    return referenceGroupId;
+  }
+
+  public @NotNull String getReferenceUserId() {
+    return referenceAttributeId;
   }
 
   private CssInliner getCssInliner() {

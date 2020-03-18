@@ -22,6 +22,8 @@ import org.w3c.dom.css.CSSStyleDeclaration;
 import org.xml.sax.InputSource;
 import org.xwiki.component.annotation.Component;
 
+import com.celements.cleverreach.exception.CssInlineException;
+
 import io.sf.carte.doc.dom4j.CSSStylableElement;
 import io.sf.carte.doc.dom4j.XHTMLDocument;
 import io.sf.carte.doc.dom4j.XHTMLDocumentFactory;
@@ -35,12 +37,14 @@ public class DefaultCssInliner implements CssInliner {
   private static final String STYLE = "style";
 
   @Override
-  public @NotNull String inline(@NotNull String html, @NotNull List<String> cssList) {
+  public @NotNull String inline(@NotNull String html, @NotNull List<String> cssList)
+      throws CssInlineException {
     return inline(html, String.join("\n", cssList));
   }
 
   @Override
-  public @NotNull String inline(@NotNull String html, @NotNull String css) {
+  public @NotNull String inline(@NotNull String html, @NotNull String css)
+      throws CssInlineException {
     checkNotNull(html);
     checkNotNull(css);
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
@@ -53,7 +57,7 @@ public class DefaultCssInliner implements CssInliner {
       return result;
     } catch (DocumentException | IOException excp) {
       LOGGER.warn("Failed to apply CSS [{}] to HTML [{}]", css, html, excp);
-      return html;
+      throw new CssInlineException(html, excp);
     }
   }
 
@@ -62,8 +66,7 @@ public class DefaultCssInliner implements CssInliner {
     InputSource source = new InputSource(re);
     SAXReader reader = new SAXReader(XHTMLDocumentFactory.getInstance());
     reader.setEntityResolver(new DefaultEntityResolver());
-    XHTMLDocument document = (XHTMLDocument) reader.read(source);
-    return document;
+    return (XHTMLDocument) reader.read(source);
   }
 
   String prepareOutput(XHTMLDocument document) throws IOException {
@@ -71,8 +74,7 @@ public class DefaultCssInliner implements CssInliner {
     StringWriter out = new StringWriter();
     XMLWriter writer = new XMLWriter(out, outputFormat);
     writer.write(document);
-    String result = out.toString();
-    return result;
+    return out.toString();
   }
 
   void applyInlineStyle(Element element) {
