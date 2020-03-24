@@ -27,8 +27,7 @@ public class DefaultRestClientFactory implements IRestClientFactoryRole {
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-      LOGGER.info("URL: [{}], Body: [{}]", requestContext.getUri().toString(), requestContext
-          .getEntity().toString());
+      LOGGER.info("URL: [{}], Body: [{}]", requestContext.getUri(), requestContext.getEntity());
     }
 
   }
