@@ -96,7 +96,12 @@ public class CleverReachRest implements CleverReachService {
       Response response = sendRestRequest(PATH_RECEIVERS + mailing.getReferenceUserId()
           + SUBPATH_ATTRIBUTES + mailing.getReferenceAttributeId(), new Value("1"),
           SubmitMethod.PUT);
-      return isReadyToSendPut(response);
+      boolean isReadyToSend = isReadyToSendPut(response);
+      if (!isReadyToSend) {
+        failNotify.send("Update worked, but setting [ready to send] = true failed.",
+            new IllegalStateException("Setting ready to send flag failed"));
+      }
+      return isReadyToSend;
     }
     return false;
   }
@@ -113,7 +118,7 @@ public class CleverReachRest implements CleverReachService {
     } else {
       LOGGER.warn("REHEARSAL STOPPED: mailing is ready to send!");
       failNotify.send("Rehearsal failed since Newsletter is still \"Ready To Send\". Check if it "
-          + "was sent correctly", new IllegalStateException("Newsletter ready to send"));
+          + "was sent correctly", new IllegalStateException("Newsletter is ready to send"));
     }
     return false;
   }
@@ -192,7 +197,8 @@ public class CleverReachRest implements CleverReachService {
             responseBody);
       }
     } else {
-      throw new CleverReachRequestFailedException("Failed to connect", null, RESPONSE_NO_BODY_LOGGING_MESSAGE);
+      throw new CleverReachRequestFailedException("Failed to connect", null,
+          RESPONSE_NO_BODY_LOGGING_MESSAGE);
     }
   }
 
@@ -284,8 +290,8 @@ public class CleverReachRest implements CleverReachService {
     if ((response != null) && response.hasEntity()) {
       String content = response.readEntity(String.class);
       try {
-        Optional<PutResponse> resultObj = Arrays.asList(new ObjectMapper()
-            .readValue(content, PutResponse.class)).stream().findFirst();
+        Optional<ResponseBodyObj> resultObj = Arrays.asList(new ObjectMapper()
+            .readValue(content, ResponseBodyObj.class)).stream().findFirst();
         return resultObj.isPresent() && "1".equals(resultObj.get().value);
       } catch (IOException ioe) {
         LOGGER.warn("Parsing CleverReach response to JSON failed. Content [{}]", content, ioe);
@@ -302,8 +308,8 @@ public class CleverReachRest implements CleverReachService {
     if ((response != null) && response.hasEntity()) {
       String content = response.readEntity(String.class);
       try {
-        Optional<GetResponse> resultObj = Arrays.asList(new ObjectMapper()
-            .readValue(content, GetResponse[].class))
+        Optional<ResponseBodyObj> resultObj = Arrays.asList(new ObjectMapper()
+            .readValue(content, ResponseBodyObj[].class))
             .stream()
             .filter(ele -> readyToSend.equals(ele.name))
             .findFirst();
@@ -392,25 +398,15 @@ public class CleverReachRest implements CleverReachService {
     }
   }
 
-  static class GetResponse {
+  static class ResponseBodyObj {
 
     public String name;
     public String value;
 
     @JsonCreator
-    public GetResponse(@JsonProperty("name") String name,
+    public ResponseBodyObj(@JsonProperty("name") String name,
         @JsonProperty("value") String value) {
       this.name = name;
-      this.value = value;
-    }
-  }
-
-  static class PutResponse {
-
-    public String value;
-
-    @JsonCreator
-    public PutResponse(@JsonProperty("value") String value) {
       this.value = value;
     }
   }
