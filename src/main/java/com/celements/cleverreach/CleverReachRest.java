@@ -48,6 +48,8 @@ import com.xpn.xwiki.objects.BaseObject;
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
 public class CleverReachRest implements CleverReachService {
 
+  private static final String RESPONSE_NO_BODY_LOGGING_MESSAGE = "[no body]";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(CleverReachRest.class);
 
   public static final String COMPONENT_NAME = "rest";
@@ -173,12 +175,15 @@ public class CleverReachRest implements CleverReachService {
       if (data instanceof MultivaluedMap) {
         getMultivalueMapFromOjb(data).add("token", token.getToken());
       }
-      Response response = sendRequest(PATH_VERSION + path, data, authHeader, method, connection);
+      String completePath = PATH_VERSION + path;
+      Response response = sendRequest(completePath, data, authHeader, method, connection);
       if (response.getStatus() == 200) {
         return response;
       } else {
-        LOGGER.trace("Request response status != 200. Response [{}]", response);
-        String responseBody = "[no body]";
+        LOGGER.trace(
+            "Request response status != 200. Path [{}], Method [{}], Data [{}], Response [{}]",
+            completePath, method, data, response);
+        String responseBody = RESPONSE_NO_BODY_LOGGING_MESSAGE;
         if (response.hasEntity()) {
           responseBody = response.readEntity(String.class);
           LOGGER.trace("Response content [{}]", responseBody);
@@ -187,7 +192,7 @@ public class CleverReachRest implements CleverReachService {
             responseBody);
       }
     } else {
-      throw new CleverReachRequestFailedException("Failed to connect", null, "[no body]");
+      throw new CleverReachRequestFailedException("Failed to connect", null, RESPONSE_NO_BODY_LOGGING_MESSAGE);
     }
   }
 
@@ -266,7 +271,7 @@ public class CleverReachRest implements CleverReachService {
       return initializeToken(response, content);
     } else {
       throw new CleverReachRequestFailedException("Unable to connect and receive token. Response "
-          + "[{}]", response, "[no body]");
+          + "[{}]", response, RESPONSE_NO_BODY_LOGGING_MESSAGE);
     }
   }
 
