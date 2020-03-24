@@ -140,15 +140,15 @@ public class MailingConfig {
   }
 
   public @NotNull String getReferenceGroupId() {
-    return referenceUserId;
-  }
-
-  public @NotNull String getReferenceAttributeId() {
     return referenceGroupId;
   }
 
-  public @NotNull String getReferenceUserId() {
+  public @NotNull String getReferenceAttributeId() {
     return referenceAttributeId;
+  }
+
+  public @NotNull String getReferenceUserId() {
+    return referenceUserId;
   }
 
   private CssInliner getCssInliner() {
