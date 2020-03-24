@@ -109,7 +109,7 @@ public class CleverReachRest implements CleverReachService {
     if (!isReadyToSendGet(response, mailing.getServerClass())) {
       return updateMailingInternal(mailing);
     } else {
-      LOGGER.warn("REHEARSAL STOPED: mailing is ready to send!");
+      LOGGER.warn("REHEARSAL STOPPED: mailing is ready to send!");
       failNotify.send("Rehearsal failed since Newsletter is still \"Ready To Send\". Check if it "
           + "was sent correctly", new IllegalStateException("Newsletter ready to send"));
     }

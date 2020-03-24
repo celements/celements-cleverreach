@@ -18,4 +18,11 @@ public class CleverReachRequestFailedException extends IOException {
   public Response getResponse() {
     return response;
   }
+
+  @Override
+  public void printStackTrace() {
+    System.err.println("Response status|length: [" + ((response != null) ? response.getStatus()
+        + "|" + response.getLength() : "null"));
+    super.printStackTrace(System.err);
+  }
 }
