@@ -93,7 +93,8 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
               .joining(" | ")))).entrySet().stream().map(entry -> entry.getKey() + " = " + entry
                   .getValue() + "\n").collect(Collectors.joining());
       content.append("Header String:\n").append(respHeaders).append("\n");
-      content.append("Body:\n").append(resp.readEntity(String.class));
+      content.append("Body:\n").append(((CleverReachRequestFailedException) excp)
+          .getResponseBody());
     } else if (excp instanceof CssInlineException) {
       content.append(((CssInlineException) excp).getExtendedMessage());
     }

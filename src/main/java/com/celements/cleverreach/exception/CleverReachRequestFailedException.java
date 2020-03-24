@@ -10,14 +10,20 @@ public class CleverReachRequestFailedException extends IOException {
   private static final long serialVersionUID = 1L;
 
   private Response response;
+  private String responseBody;
 
-  public CleverReachRequestFailedException(String message, Response response) {
+  public CleverReachRequestFailedException(String message, Response response, String responseBody) {
     super(message);
     this.response = response;
+    this.responseBody = responseBody;
   }
 
   public Response getResponse() {
     return response;
+  }
+
+  public String getResponseBody() {
+    return responseBody;
   }
 
   @Override

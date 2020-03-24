@@ -178,13 +178,16 @@ public class CleverReachRest implements CleverReachService {
         return response;
       } else {
         LOGGER.trace("Request response status != 200. Response [{}]", response);
+        String responseBody = "[no body]";
         if (response.hasEntity()) {
-          LOGGER.trace("Response content [{}]", response.readEntity(String.class));
+          responseBody = response.readEntity(String.class);
+          LOGGER.trace("Response content [{}]", responseBody);
         }
-        throw new CleverReachRequestFailedException("Response code status != 200", response);
+        throw new CleverReachRequestFailedException("Response code status != 200", response,
+            responseBody);
       }
     } else {
-      throw new CleverReachRequestFailedException("Failed to connect", null);
+      throw new CleverReachRequestFailedException("Failed to connect", null, "[no body]");
     }
   }
 
@@ -263,7 +266,7 @@ public class CleverReachRest implements CleverReachService {
       return initializeToken(response, content);
     } else {
       throw new CleverReachRequestFailedException("Unable to connect and receive token. Response "
-          + "[{}]", response);
+          + "[{}]", response, "[no body]");
     }
   }
 
