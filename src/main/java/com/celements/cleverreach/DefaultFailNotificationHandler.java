@@ -2,8 +2,14 @@ package com.celements.cleverreach;
 
 import static com.celements.model.util.References.*;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +19,8 @@ import org.xwiki.model.reference.ClassReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 
+import com.celements.cleverreach.exception.CleverReachRequestFailedException;
+import com.celements.cleverreach.exception.CssInlineException;
 import com.celements.common.classes.IClassCollectionRole;
 import com.celements.mailsender.IMailSenderRole;
 import com.celements.model.access.IModelAccessFacade;
@@ -49,10 +57,10 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
       XWikiDocument configDoc = modelAccess.getDocument(getConfigDocRef());
       List<BaseObject> receivers = XWikiObjectFetcher.on(configDoc).filter(
           getReceiverEmailClassRef()).list();
+      String content = getMailingContent(msg, excp);
+      Optional<String> fromMail = getFromMail(configDoc);
       for (BaseObject receiver : receivers) {
         if (1 == receiver.getIntValue("is_active")) {
-          String content = "<h2>" + excp.getMessage() + "</h2><div>" + msg + "</div>";
-          Optional<String> fromMail = getFromMail(configDoc);
           if (fromMail.isPresent()) {
             mailSender.sendMail(fromMail.get(), null, receiver.getStringValue("email"), null,
                 null, "TAGESAGENDA UPDATE FAILED!", content, content, null, null);
@@ -65,6 +73,35 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
     } catch (DocumentNotExistsException dnee) {
       LOGGER.error("Unable to read failed notification configuration. Doc does not exist.", dnee);
     }
+  }
+
+  String getMailingContent(String msg, Exception excp) {
+    StringWriter content = new StringWriter();
+    PrintWriter pw = new PrintWriter(new StringWriter());
+    excp.printStackTrace(pw);
+    content.append("<h2>")
+        .append(excp.getMessage())
+        .append("</h2><div>")
+        .append(msg).append("</div><hr /><pre>");
+    if ((excp instanceof CleverReachRequestFailedException)
+        && (((CleverReachRequestFailedException) excp).getResponse() != null)) {
+      Response resp = ((CleverReachRequestFailedException) excp).getResponse();
+      content.append("Status Code: ").append(Integer.toString(resp.getStatus())).append("\n");
+      content.append("Length: ").append(Integer.toString(resp.getLength())).append("\n");
+      String respHeaders = resp.getStringHeaders().entrySet().stream().collect(
+          Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream().collect(Collectors
+              .joining(" | ")))).entrySet().stream().map(entry -> entry.getKey() + " = " + entry
+                  .getValue() + "\n").collect(Collectors.joining());
+      content.append("Header String:\n").append(respHeaders).append("\n");
+      content.append("Body:\n").append(resp.readEntity(String.class));
+    } else if (excp instanceof CssInlineException) {
+      content.append(((CssInlineException) excp).getExtendedMessage());
+    }
+    content.append("</pre><hr /><pre>")
+        .append(pw.toString())
+        .append("</pre>");
+    pw.close();
+    return content.toString();
   }
 
   Optional<String> getFromMail(XWikiDocument configDoc) {

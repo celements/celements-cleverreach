@@ -30,7 +30,11 @@ public class CssInlineException extends Exception {
 
   @Override
   public String getMessage() {
-    return "CSS could not be inlined. Culprit was:\n" + getExceptionRangeSnippet();
+    return "CSS could not be inlined.";
+  }
+
+  public String getExtendedMessage() {
+    return "Culprit was:\n" + getExceptionRangeSnippet();
   }
 
   @Override

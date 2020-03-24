@@ -1,6 +1,7 @@
 package com.celements.cleverreach.exception;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import javax.ws.rs.core.Response;
 
@@ -21,8 +22,17 @@ public class CleverReachRequestFailedException extends IOException {
 
   @Override
   public void printStackTrace() {
-    System.err.println("Response status|length: [" + ((response != null) ? response.getStatus()
-        + "|" + response.getLength() : "null"));
-    super.printStackTrace(System.err);
+    printStackTrace(System.err);
+  }
+
+  @Override
+  public void printStackTrace(PrintStream ps) {
+    ps.println(getResponseStatusAndLength());
+    super.printStackTrace(ps);
+  }
+
+  String getResponseStatusAndLength() {
+    return "Response status|length: [" + ((response != null) ? response.getStatus()
+        + "|" + response.getLength() : "null");
   }
 }
