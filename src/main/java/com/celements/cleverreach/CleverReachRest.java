@@ -61,7 +61,7 @@ public class CleverReachRest implements CleverReachService {
   static final String PATH_LOGIN = "oauth/token.php";
   static final String PATH_MAILINGS = "mailings.json/";
   static final String PATH_RECEIVERS = "receivers.json/";
-  static final String SUBPATH_ATTRIBUTES = "/attributes/";
+  static final String SUBPATH_ATTRIBUTES = "/attributes";
   static final String PATH_WHOAMI = "debug/whoami.json";
   static final String PATH_TTL = "debug/ttl.json";
 
@@ -94,7 +94,7 @@ public class CleverReachRest implements CleverReachService {
     checkNotNull(mailing);
     if (updateMailingInternal(mailing)) {
       Response response = sendRestRequest(PATH_RECEIVERS + mailing.getReferenceUserId()
-          + SUBPATH_ATTRIBUTES + mailing.getReferenceAttributeId(), new Value("1"),
+          + SUBPATH_ATTRIBUTES + "/" + mailing.getReferenceAttributeId(), new Value("1"),
           SubmitMethod.PUT);
       boolean isReadyToSend = isReadyToSendPut(response);
       if (!isReadyToSend) {
