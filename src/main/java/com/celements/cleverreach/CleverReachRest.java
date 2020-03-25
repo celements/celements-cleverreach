@@ -327,7 +327,7 @@ public class CleverReachRest implements CleverReachService {
   Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
       String baseUrl) {
     WebTarget target = clientFactory.newClient().target(baseUrl).path(path);
-    addGetParameters(data, target, method);
+    target = addGetParameters(data, target, method);
     Builder request = target.request().header("Authorization", authHeader);
     switch (method) {
       case GET:
@@ -367,13 +367,16 @@ public class CleverReachRest implements CleverReachService {
     return Entity.text("");
   }
 
-  void addGetParameters(Object data, WebTarget target, SubmitMethod method) {
+  WebTarget addGetParameters(Object data, WebTarget target, SubmitMethod method) {
+    // an array is used as workaround to set non final variable inside lambda expression.
+    final WebTarget[] withParams = { target };
     if ((method == SubmitMethod.GET) && (data instanceof MultivaluedMap)) {
       getMultivalueMapFromOjb(data).entrySet().stream().forEach(entry -> {
-        target.queryParam(entry.getKey(), entry.getValue().toArray());
+        withParams[0] = target.queryParam(entry.getKey(), entry.getValue().toArray());
         LOGGER.trace("addGetParameter: [{}]=[{}]", entry.getKey(), entry.getValue().toString());
       });
     }
+    return withParams[0];
   }
 
   @SuppressWarnings("unchecked")
