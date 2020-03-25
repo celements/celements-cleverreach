@@ -372,9 +372,9 @@ public class CleverReachRest implements CleverReachService {
     final WebTarget[] withParams = { target };
     if ((method == SubmitMethod.GET) && (data instanceof MultivaluedMap)) {
       getMultivalueMapFromOjb(data).entrySet().stream().forEach(entry -> {
-        withParams[0] = target.queryParam(entry.getKey(), (entry.getValue().size() == 1) ? entry
-            .getValue().get(0) : entry.getValue().toArray());
-        LOGGER.trace("addGetParameter: [{}]=[{}]", entry.getKey(), entry.getValue().toString());
+        withParams[0] = withParams[0].queryParam(entry.getKey(), (entry.getValue().size() == 1)
+            ? entry.getValue().get(0) : entry.getValue().toArray());
+        LOGGER.trace("addGetParameter: [{}]=[{}]", entry.getKey(), entry.getValue());
       });
     }
     return withParams[0];
