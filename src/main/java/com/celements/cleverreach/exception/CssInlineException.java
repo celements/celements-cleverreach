@@ -1,7 +1,11 @@
 package com.celements.cleverreach.exception;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Scanner;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.validation.constraints.NotNull;
 
@@ -44,9 +48,12 @@ public class CssInlineException extends Exception {
 
   String getExceptionRangeSnippet() {
     if (Strings.isNullOrEmpty(snippet) && !Strings.isNullOrEmpty(html)) {
-      snippet = scanLines(super.getMessage(), 1, 1, SHORT_MESSAGE) + "\n";
+      snippet = getMessage.get() + "\n";
       try {
-        int exceptionLine = Integer.parseInt(snippet.replaceAll("^(\\d+).*", "$1"));
+        StringWriter sw = (injected_sw != null) ? injected_sw : new StringWriter();
+        printStackTrace.accept(sw);
+        int exceptionLine = Integer.parseInt(sw.toString().replaceAll(
+            "^[\\s\\S]*Error on line (\\d+) [\\s\\S]*", "$1"));
         snippet += scanLines(html, exceptionLine - 2, exceptionLine + 2, SNIPPET);
       } catch (NumberFormatException nfe) {
         LOGGER.debug("Exception Message has no line number referenced. Message: [{}]",
@@ -72,4 +79,23 @@ public class CssInlineException extends Exception {
     scanner.close();
     return result.toString();
   }
+
+  // Unit test helpers
+  Exception injected_excp;
+  StringWriter injected_sw;
+  private final Supplier<String> getMessage = () -> {
+    if (injected_excp != null) {
+      return injected_excp.getMessage();
+    } else {
+      return super.getMessage();
+    }
+  };
+  private final Consumer<StringWriter> printStackTrace = (sw) -> {
+    PrintWriter pw = new PrintWriter(sw);
+    if (injected_excp != null) {
+      injected_excp.printStackTrace(pw);
+    } else {
+      super.printStackTrace(pw);
+    }
+  };
 }

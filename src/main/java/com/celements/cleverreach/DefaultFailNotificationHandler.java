@@ -77,8 +77,6 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
 
   String getMailingContent(String msg, Exception excp) {
     StringWriter content = new StringWriter();
-    PrintWriter pw = new PrintWriter(new StringWriter());
-    excp.printStackTrace(pw);
     content.append("<h2>")
         .append(excp.getMessage())
         .append("</h2><div>")
@@ -87,7 +85,6 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
         && (((CleverReachRequestFailedException) excp).getResponse() != null)) {
       Response resp = ((CleverReachRequestFailedException) excp).getResponse();
       content.append("Status Code: ").append(Integer.toString(resp.getStatus())).append("\n");
-      content.append("Length: ").append(Integer.toString(resp.getLength())).append("\n");
       String respHeaders = resp.getStringHeaders().entrySet().stream().collect(
           Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream().collect(Collectors
               .joining(" | ")))).entrySet().stream().map(entry -> entry.getKey() + " = " + entry
@@ -98,11 +95,19 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
     } else if (excp instanceof CssInlineException) {
       content.append(((CssInlineException) excp).getExtendedMessage());
     }
-    content.append("</pre><hr /><pre>")
-        .append(pw.toString())
-        .append("</pre>");
-    pw.close();
+    appendStackTrace(excp, content);
     return content.toString();
+  }
+
+  void appendStackTrace(Exception excp, StringWriter content) {
+    StringWriter sw = new StringWriter();
+    try (PrintWriter pw = new PrintWriter(sw)) {
+      excp.printStackTrace(pw);
+      pw.flush();
+      content.append("</pre><hr /><pre>")
+          .append(sw.toString())
+          .append("</pre>");
+    }
   }
 
   Optional<String> getFromMail(XWikiDocument configDoc) {
