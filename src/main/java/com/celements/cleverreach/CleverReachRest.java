@@ -291,9 +291,10 @@ public class CleverReachRest implements CleverReachService {
     if ((response != null) && response.hasEntity()) {
       String content = response.readEntity(String.class);
       try {
-        Optional<ResponseBodyObj> resultObj = Arrays.asList(new ObjectMapper()
-            .readValue(content, ResponseBodyObj.class)).stream().findFirst();
-        return resultObj.isPresent() && "1".equals(resultObj.get().value);
+        return Optional.ofNullable(new ObjectMapper()
+            .readValue(content, ResponseBodyObj.class))
+            .map(responseObj -> "1".equals(responseObj.value))
+            .orElse(false);
       } catch (IOException ioe) {
         LOGGER.warn("Parsing CleverReach response to JSON failed. Content [{}]", content, ioe);
       }
