@@ -225,8 +225,7 @@ public class CleverReachRest implements CleverReachService {
 
   CleverReachConnection getConnection() throws CleverReachRequestFailedException {
     CleverReachConnection cachedConnection = (CleverReachConnection) execution.getContext()
-        .getProperty(
-            CONTEXT_CONNECTION_KEY);
+        .getProperty(CONTEXT_CONNECTION_KEY);
     if ((null == cachedConnection) || !cachedConnection.isConnected()) {
       Optional<BaseObject> configObj = Optional.empty();
       try {
