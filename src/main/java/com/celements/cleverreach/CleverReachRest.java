@@ -299,8 +299,7 @@ public class CleverReachRest implements CleverReachService {
         LOGGER.warn("Parsing CleverReach response to JSON failed. Content [{}]", content, ioe);
       }
     } else {
-      LOGGER.warn("Mailing update failed with response [{}] and response hasEntity [{}]", response,
-          (response != null) && response.hasEntity());
+      LOGGER.warn("Mailing update failed with response [{}]", response);
     }
     return false;
   }
@@ -320,8 +319,7 @@ public class CleverReachRest implements CleverReachService {
         LOGGER.warn("Parsing CleverReach response to JSON failed. Content [{}]", content, ioe);
       }
     } else {
-      LOGGER.warn("Mailing update failed with response [{}] and response hasEntity [{}]", response,
-          (response != null) && response.hasEntity());
+      LOGGER.warn("Mailing update failed with response [{}]", response);
     }
     return false;
   }
