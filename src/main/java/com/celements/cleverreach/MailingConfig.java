@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.celements.cleverreach.CleverReachService.ServerClass;
@@ -57,19 +58,19 @@ public class MailingConfig {
       return this;
     }
 
-    public Builder setReferenceUserId(@NotNull String referenceUserId) {
+    public Builder setReferenceUserId(@NotEmpty String referenceUserId) {
       checkArgument(!Strings.isNullOrEmpty(referenceUserId));
       this.referenceUserId = referenceUserId;
       return this;
     }
 
-    public Builder setReferenceGroupId(@NotNull String referenceGroupId) {
+    public Builder setReferenceGroupId(@NotEmpty String referenceGroupId) {
       checkArgument(!Strings.isNullOrEmpty(referenceGroupId));
       this.referenceGroupId = referenceGroupId;
       return this;
     }
 
-    public Builder setReferenceAttributeId(@NotNull String referenceAttributeId) {
+    public Builder setReferenceAttributeId(@NotEmpty String referenceAttributeId) {
       checkArgument(!Strings.isNullOrEmpty(referenceAttributeId));
       this.referenceAttributeId = referenceAttributeId;
       return this;
@@ -139,15 +140,15 @@ public class MailingConfig {
     return serverClass;
   }
 
-  public @NotNull String getReferenceGroupId() {
+  public @NotEmpty String getReferenceGroupId() {
     return referenceGroupId;
   }
 
-  public @NotNull String getReferenceAttributeId() {
+  public @NotEmpty String getReferenceAttributeId() {
     return referenceAttributeId;
   }
 
-  public @NotNull String getReferenceUserId() {
+  public @NotEmpty String getReferenceUserId() {
     return referenceUserId;
   }
 
