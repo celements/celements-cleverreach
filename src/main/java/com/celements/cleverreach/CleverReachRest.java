@@ -4,10 +4,10 @@ import static com.celements.model.util.References.*;
 import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Entity;
@@ -310,12 +310,12 @@ public class CleverReachRest implements CleverReachService {
     if ((response != null) && response.hasEntity()) {
       String content = response.readEntity(String.class);
       try {
-        Optional<ResponseBodyObj> resultObj = Arrays.asList(new ObjectMapper()
+        return Stream.of(new ObjectMapper()
             .readValue(content, ResponseBodyObj[].class))
-            .stream()
-            .filter(ele -> readyToSend.equals(ele.name))
-            .findFirst();
-        return resultObj.isPresent() && "1".equals(resultObj.get().value);
+            .filter(responseObj -> readyToSend.equals(responseObj.name))
+            .findFirst()
+            .map(responseObj -> "1".equals(responseObj.value))
+            .orElse(false);
       } catch (IOException ioe) {
         LOGGER.warn("Parsing CleverReach response to JSON failed. Content [{}]", content, ioe);
       }
