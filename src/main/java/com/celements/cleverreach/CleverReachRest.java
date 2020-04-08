@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Entity;
@@ -66,6 +67,8 @@ public class CleverReachRest implements CleverReachService {
   static final String PATH_TTL = "debug/ttl.json";
 
   static final String CONTEXT_CONNECTION_KEY = "clever_reach_connection";
+
+  private static Pattern PATTERN_SUCCESS_RESP = Pattern.compile(".*\"success\".{0,1}:.{0,1}true.*");
 
   enum SubmitMethod {
     GET, POST, PUT, DELETE
@@ -131,8 +134,8 @@ public class CleverReachRest implements CleverReachService {
       if ((response != null) && response.hasEntity()) {
         String content = response.readEntity(String.class);
         LOGGER.debug("Mailing update response content [{}]", content);
-        if (content.contains(mailingConf.getId()) && content.matches(
-            ".*\"success\".{0,1}:.{0,1}true.*")) {
+        if (content.contains(mailingConf.getId()) && PATTERN_SUCCESS_RESP.matcher(content)
+            .matches()) {
           return true;
         }
         LOGGER.warn("Mailing update not successful. Response content is [{}]", content);
