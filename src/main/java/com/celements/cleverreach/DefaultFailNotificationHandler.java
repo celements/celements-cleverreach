@@ -59,16 +59,16 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
           getReceiverEmailClassRef()).list();
       String content = getMailingContent(msg, excp);
       Optional<String> fromMail = getFromMail(configDoc);
-      for (BaseObject receiver : receivers) {
-        if (1 == receiver.getIntValue("is_active")) {
-          if (fromMail.isPresent()) {
+      if (fromMail.isPresent()) {
+        for (BaseObject receiver : receivers) {
+          if (1 == receiver.getIntValue("is_active")) {
             mailSender.sendMail(fromMail.get(), null, receiver.getStringValue("email"), null,
                 null, "TAGESAGENDA UPDATE FAILED!", content, content, null, null);
-          } else {
-            LOGGER.error("Missing 'from' mail configuration for 'Tagesagenda update failed' "
-                + "notification");
           }
         }
+      } else {
+        LOGGER.error("Missing 'from' mail configuration for 'Tagesagenda update failed' "
+            + "notification");
       }
     } catch (DocumentNotExistsException dnee) {
       LOGGER.error("Unable to read failed notification configuration. Doc does not exist.", dnee);
