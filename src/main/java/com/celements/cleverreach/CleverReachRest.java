@@ -123,7 +123,7 @@ public class CleverReachRest implements CleverReachService {
     return false;
   }
 
-  public boolean updateMailingInternal(MailingConfig mailingConf) throws IOException {
+  private boolean updateMailingInternal(MailingConfig mailingConf) throws IOException {
     try {
       Response response = sendRestRequest(PATH_MAILINGS + mailingConf.getId(), buildMailing(
           mailingConf), SubmitMethod.PUT);
