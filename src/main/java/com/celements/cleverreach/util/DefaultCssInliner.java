@@ -8,8 +8,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -37,13 +35,13 @@ public class DefaultCssInliner implements CssInliner {
   private static final String STYLE = "style";
 
   @Override
-  public @NotNull String inline(@NotNull String html, @NotNull List<String> cssList)
+  public String inline(String html, List<String> cssList)
       throws CssInlineException {
     return inline(html, String.join("\n", cssList));
   }
 
   @Override
-  public @NotNull String inline(@NotNull String html, @NotNull String css)
+  public String inline(String html, String css)
       throws CssInlineException {
     checkNotNull(html);
     checkNotNull(css);
