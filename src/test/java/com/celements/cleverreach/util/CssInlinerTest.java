@@ -25,21 +25,21 @@ public class CssInlinerTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testInline_null() {
+  public void testInline_null() throws CssInlineException {
     try {
       cssInliner.inline(null, "");
       fail("Expecting NPE");
-    } catch (CssInlineException | NullPointerException npe) {
+    } catch (NullPointerException npe) {
       // expected outcome
     }
   }
 
   @Test
-  public void testInline_noStyles() {
+  public void testInline_noStyles() throws CssInlineException {
     try {
       cssInliner.inline("<div></div>", (String) null);
       fail("Expecting NPE");
-    } catch (CssInlineException | NullPointerException npe) {
+    } catch (NullPointerException npe) {
       // expected outcome
     }
   }
