@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
@@ -283,7 +284,7 @@ public class CleverReachRest implements CleverReachService {
   }
 
   Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
-      CleverReachConnection connection) {
+      CleverReachConnection connection) throws CleverReachRequestFailedException {
     return sendRequest(path, data, authHeader, method, connection.getBaseUrl());
   }
 
@@ -325,19 +326,25 @@ public class CleverReachRest implements CleverReachService {
   }
 
   Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
-      String baseUrl) {
+      String baseUrl) throws CleverReachRequestFailedException {
     WebTarget target = clientFactory.newClient().target(baseUrl).path(path);
     target = addGetParameters(data, target, method);
     Builder request = target.request().header("Authorization", authHeader);
-    switch (method) {
-      case GET:
-        return request.get();
-      case PUT:
-        return request.put(getRequestDataEntity(data));
-      case DELETE:
-        return request.delete();
-      default: // Default to SubmitMethod.POST
-        return request.post(getRequestDataEntity(data));
+    try {
+      switch (method) {
+        case GET:
+          return request.get();
+        case PUT:
+          return request.put(getRequestDataEntity(data));
+        case DELETE:
+          return request.delete();
+        default: // Default to SubmitMethod.POST
+          return request.post(getRequestDataEntity(data));
+      }
+    } catch (ProcessingException pe) {
+      LOGGER.error("[{}] call to CleverReach failed.", method, pe);
+      throw new CleverReachRequestFailedException("[" + method + "] call to CleverReach failed.",
+          RESPONSE_NO_BODY_LOGGING_MESSAGE, pe);
     }
   }
 

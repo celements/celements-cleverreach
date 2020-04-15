@@ -18,6 +18,11 @@ public class CleverReachRequestFailedException extends IOException {
     this.responseBody = responseBody;
   }
 
+  public CleverReachRequestFailedException(String message, String responseBody, Exception e) {
+    super(message, e);
+    this.responseBody = responseBody;
+  }
+
   public Response getResponse() {
     return response;
   }
