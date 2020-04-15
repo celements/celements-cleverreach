@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.xwiki.context.Execution;
 
 import com.celements.cleverreach.CleverReachService.ServerClass;
+import com.celements.cleverreach.exception.CleverReachRequestFailedException;
 import com.celements.common.test.AbstractComponentTest;
 import com.xpn.xwiki.web.Utils;
 
@@ -34,7 +35,7 @@ public class CleverReachRestTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testSendRequest() {
+  public void testSendRequest() throws CleverReachRequestFailedException {
     String baseUrl = "http://www.test-base-url.test";
     String path = "/test/path";
     String token = "token123";
