@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -327,9 +328,10 @@ public class CleverReachRest implements CleverReachService {
 
   Response sendRequest(String path, Object data, String authHeader, SubmitMethod method,
       String baseUrl) throws CleverReachRequestFailedException {
-    WebTarget target = clientFactory.newClient().target(baseUrl).path(path);
-    target = addGetParameters(data, target, method);
-    Builder request = target.request().header("Authorization", authHeader);
+    AtomicReference<WebTarget> target = new AtomicReference(clientFactory.newClient().target(
+        baseUrl).path(path));
+    addGetParameters(data, target, method);
+    Builder request = target.get().request().header("Authorization", authHeader);
     try {
       switch (method) {
         case GET:
@@ -374,17 +376,14 @@ public class CleverReachRest implements CleverReachService {
     return Entity.text("");
   }
 
-  WebTarget addGetParameters(Object data, WebTarget target, SubmitMethod method) {
-    // an array is used as workaround to set non final variable inside lambda expression.
-    final WebTarget[] withParams = { target };
+  void addGetParameters(Object data, AtomicReference<WebTarget> target, SubmitMethod method) {
     if ((method == SubmitMethod.GET) && (data instanceof MultivaluedMap)) {
       getMultivalueMapFromOjb(data).entrySet().stream().forEach(entry -> {
-        withParams[0] = withParams[0].queryParam(entry.getKey(), (entry.getValue().size() == 1)
-            ? entry.getValue().get(0) : entry.getValue().toArray());
+        target.set(target.get().queryParam(entry.getKey(), (entry.getValue().size() == 1)
+            ? entry.getValue().get(0) : entry.getValue().toArray()));
         LOGGER.trace("addGetParameter: [{}]=[{}]", entry.getKey(), entry.getValue());
       });
     }
-    return withParams[0];
   }
 
   @SuppressWarnings("unchecked")

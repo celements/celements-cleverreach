@@ -4,6 +4,8 @@ import static com.celements.common.test.CelementsTestUtils.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -88,7 +90,8 @@ public class CleverReachRestTest extends AbstractComponentTest {
     expect(target.queryParam("b", new Object[] { "2" })).andReturn(target);
     expect(target.queryParam("c", new Object[] { "3" })).andReturn(target);
     replayDefault();
-    rest.addGetParameters(map, target, CleverReachRest.SubmitMethod.GET);
+    rest.addGetParameters(map, new AtomicReference<>(target),
+        CleverReachRest.SubmitMethod.GET);
     verifyDefault();
   }
 
