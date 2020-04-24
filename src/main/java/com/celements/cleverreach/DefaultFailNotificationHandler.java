@@ -1,11 +1,8 @@
 package com.celements.cleverreach;
 
-import static com.celements.model.util.References.*;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -17,7 +14,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.ClassReference;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.SpaceReference;
 
 import com.celements.cleverreach.exception.CleverReachRequestFailedException;
 import com.celements.cleverreach.exception.CssInlineException;
@@ -28,6 +24,7 @@ import com.celements.model.access.IModelAccessFacade;
 import com.celements.model.access.exception.DocumentNotExistsException;
 import com.celements.model.context.ModelContext;
 import com.celements.model.object.xwiki.XWikiObjectFetcher;
+import com.celements.model.reference.RefBuilder;
 import com.celements.web.classcollections.OldCoreClasses;
 import com.celements.web.classes.FormMailClass;
 import com.xpn.xwiki.doc.XWikiDocument;
