@@ -77,10 +77,9 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
 
   String getMailingContent(String msg, Exception excp) {
     StringWriter content = new StringWriter();
-    content.append("<h2>")
-        .append(excp.getMessage())
-        .append("</h2><div>")
-        .append(msg).append("</div><hr /><pre>");
+    content.append("<h2>").append(excp.getMessage()).append("</h2>")
+        .append("<div>").append(msg).append("</div>")
+        .append("<hr /><pre>");
     if ((excp instanceof CleverReachRequestFailedException)
         && (((CleverReachRequestFailedException) excp).getResponse() != null)) {
       Response resp = ((CleverReachRequestFailedException) excp).getResponse();
