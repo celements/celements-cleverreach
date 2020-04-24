@@ -121,8 +121,8 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
   }
 
   public DocumentReference getConfigDocRef() {
-    return create(DocumentReference.class, CleverReachRest.REST_CONFIG_DOC_NAME,
-        create(SpaceReference.class, CleverReachRest.REST_CONFIG_SPACE_NAME, context.getWikiRef()));
+    return RefBuilder.from(context.getWikiRef()).space(CleverReachRest.REST_CONFIG_SPACE_NAME)
+        .doc(CleverReachRest.REST_CONFIG_DOC_NAME).build(DocumentReference.class);
   }
 
 }
