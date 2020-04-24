@@ -85,10 +85,10 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
         .map(e -> e.getResponse()).orElse(null);
     if (resp != null) {
       content.append("Status Code: ").append(Integer.toString(resp.getStatus())).append("\n");
-      String respHeaders = resp.getStringHeaders().entrySet().stream().collect(
-          Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream().collect(Collectors
-              .joining(" | ")))).entrySet().stream().map(entry -> entry.getKey() + " = " + entry
-                  .getValue() + "\n").collect(Collectors.joining());
+      String respHeaders = resp.getStringHeaders().entrySet().stream()
+          .map(entry -> entry.getKey() + " = " + entry.getValue().stream()
+              .collect(Collectors.joining(" | ")) + "\n")
+          .collect(Collectors.joining());
       content.append("Header String:\n").append(respHeaders).append("\n");
       content.append("Body:\n").append(((CleverReachRequestFailedException) excp)
           .getResponseBody());
