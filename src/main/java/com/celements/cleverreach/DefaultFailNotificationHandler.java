@@ -55,11 +55,11 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
     LOGGER.error(msg, excp);
     try {
       XWikiDocument configDoc = modelAccess.getDocument(getConfigDocRef());
-      List<BaseObject> receivers = XWikiObjectFetcher.on(configDoc).filter(
-          getReceiverEmailClassRef()).list();
-      String content = getMailingContent(msg, excp);
       Optional<String> fromMail = getFromMail(configDoc);
       if (fromMail.isPresent()) {
+        List<BaseObject> receivers = XWikiObjectFetcher.on(configDoc).filter(
+            getReceiverEmailClassRef()).list();
+        String content = getMailingContent(msg, excp);
         for (BaseObject receiver : receivers) {
           if (1 == receiver.getIntValue("is_active")) {
             mailSender.sendMail(fromMail.get(), null, receiver.getStringValue("email"), null,
