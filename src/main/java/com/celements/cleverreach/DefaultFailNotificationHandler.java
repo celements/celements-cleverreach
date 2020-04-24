@@ -21,6 +21,7 @@ import org.xwiki.model.reference.SpaceReference;
 
 import com.celements.cleverreach.exception.CleverReachRequestFailedException;
 import com.celements.cleverreach.exception.CssInlineException;
+import com.celements.common.MoreObjectsCel;
 import com.celements.common.classes.IClassCollectionRole;
 import com.celements.mailsender.IMailSenderRole;
 import com.celements.model.access.IModelAccessFacade;
@@ -80,9 +81,9 @@ public class DefaultFailNotificationHandler implements FailNotificationHandlerRo
     content.append("<h2>").append(excp.getMessage()).append("</h2>")
         .append("<div>").append(msg).append("</div>")
         .append("<hr /><pre>");
-    if ((excp instanceof CleverReachRequestFailedException)
-        && (((CleverReachRequestFailedException) excp).getResponse() != null)) {
-      Response resp = ((CleverReachRequestFailedException) excp).getResponse();
+    Response resp = MoreObjectsCel.tryCast(excp, CleverReachRequestFailedException.class)
+        .map(e -> e.getResponse()).orElse(null);
+    if (resp != null) {
       content.append("Status Code: ").append(Integer.toString(resp.getStatus())).append("\n");
       String respHeaders = resp.getStringHeaders().entrySet().stream().collect(
           Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream().collect(Collectors
