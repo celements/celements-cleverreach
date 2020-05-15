@@ -191,15 +191,16 @@ public class CleverReachRest implements CleverReachService {
       if (response.getStatus() == 200) {
         return response;
       } else {
-        LOGGER.trace("Request response status != 200. Path [{}], Method [{}], Data [{}], "
-            + "Response [{}]", completePath, method, data, response);
+        String errorMailMsg = "Request response status != 200. Status [" + response.getStatus()
+            + "], Path [" + completePath + "], Method [" + method + "], Data ["+response+"], "
+            + "Response ["+data+"]";
+        LOGGER.trace(errorMailMsg);
         String responseBody = RESPONSE_NO_BODY_LOGGING_MESSAGE;
         if (response.hasEntity()) {
           responseBody = response.readEntity(String.class);
           LOGGER.trace("Response content [{}]", responseBody);
         }
-        throw new CleverReachRequestFailedException("Response code status != 200", response,
-            responseBody);
+        throw new CleverReachRequestFailedException(errorMailMsg, response, responseBody);
       }
     } else {
       throw new CleverReachRequestFailedException("Failed to connect", null,
