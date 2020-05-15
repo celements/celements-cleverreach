@@ -21,6 +21,7 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.annotate.JsonTypeInfo.As;
@@ -408,6 +409,7 @@ public class CleverReachRest implements CleverReachService {
     }
   }
 
+  @JsonIgnoreProperties(ignoreUnknown = true)
   static class ResponseBodyObj {
 
     public String name;
