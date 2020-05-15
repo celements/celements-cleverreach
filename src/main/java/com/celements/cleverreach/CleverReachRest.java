@@ -133,10 +133,10 @@ public class CleverReachRest implements CleverReachService {
     try {
       Response response = sendRestRequest(PATH_MAILINGS + mailingConf.getId(), buildMailing(
           mailingConf), SubmitMethod.PUT);
-      LOGGER.debug("Mailing update response [{}]", response);
+      LOGGER.info("Mailing update response [{}]", response);
       if ((response != null) && response.hasEntity()) {
         String content = response.readEntity(String.class);
-        LOGGER.debug("Mailing update response content [{}]", content);
+        LOGGER.info("Mailing update response content [{}]", content);
         if (content.contains(mailingConf.getId()) && PATTERN_SUCCESS_RESP.matcher(content)
             .matches()) {
           return true;
@@ -194,11 +194,11 @@ public class CleverReachRest implements CleverReachService {
         String errorMailMsg = "Request response status != 200. Status [" + response.getStatus()
             + "], Path [" + completePath + "], Method [" + method + "], Data ["+response+"], "
             + "Response ["+data+"]";
-        LOGGER.trace(errorMailMsg);
+        LOGGER.info(errorMailMsg);
         String responseBody = RESPONSE_NO_BODY_LOGGING_MESSAGE;
         if (response.hasEntity()) {
           responseBody = response.readEntity(String.class);
-          LOGGER.trace("Response content [{}]", responseBody);
+          LOGGER.info("Response content [{}]", responseBody);
         }
         throw new CleverReachRequestFailedException(errorMailMsg, response, responseBody);
       }
@@ -213,7 +213,7 @@ public class CleverReachRest implements CleverReachService {
     try {
       CleverReachToken token = objMapper.readValue(jsonResponse.getBytes(), CleverReachToken.class);
       if (token.isValid()) {
-        LOGGER.debug("new token received [{}]", token);
+        LOGGER.trace("new token received [{}]", token);
         return token;
       } else {
         LOGGER.warn("Unable to receive token. Response [{}]", response);
