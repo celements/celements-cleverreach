@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>celements-cleverreach</artifactId>
-  <version>4.1-SNAPSHOT</version>
+  <version>4.1</version>
   <description>Celements connector to Clever Reach API</description>
   <dependencies>
     <dependency>
@@ -47,6 +47,6 @@
     <connection>scm:git:git@github.com:celements/celements-cleverreach.git</connection>
     <developerConnection>scm:git:git@github.com:celements/celements-cleverreach.git</developerConnection>
     <url>https://github.com/celements/celements-cleverreach</url>
-    <tag>HEAD</tag>
+    <tag>celements-cleverreach-4.1</tag>
   </scm>
 </project>
