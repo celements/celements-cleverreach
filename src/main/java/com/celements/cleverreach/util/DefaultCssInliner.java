@@ -7,6 +7,7 @@ import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class DefaultCssInliner implements CssInliner {
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
     try {
       String result = Dom4JParser.createXHtmlParser().allowDTDs()
-          .readAndExecute(html, rethrowPredicate(document -> applyInlineStyle(document, css)))
+          .readAndExecute(html, rethrowFunction(document -> applyInlineStyle(document, css)))
           .orElseThrow(() -> new CssInlineException(html, null));
       LOGGER.trace("HTML with CSS INLINED [{}]", result);
       return result;
@@ -50,7 +51,8 @@ public class DefaultCssInliner implements CssInliner {
     }
   }
 
-  private boolean applyInlineStyle(XHTMLDocument document, String css) throws IOException {
+  private Optional<XHTMLDocument> applyInlineStyle(XHTMLDocument document, String css)
+      throws IOException {
     document.addStyleSheet(new org.w3c.css.sac.InputSource(new StringReader(css)));
     document.selectNodes("//*").stream()
         .flatMap(tryCast(CSSStylableElement.class))
@@ -60,7 +62,7 @@ public class DefaultCssInliner implements CssInliner {
             element.addAttribute(STYLE, style.getCssText());
           }
         });
-    return true;
+    return Optional.of(document);
   }
 
 }
