@@ -7,7 +7,7 @@ import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class DefaultCssInliner implements CssInliner {
     }
   }
 
-  private Optional<XHTMLDocument> applyInlineStyle(XHTMLDocument document, String css)
+  private Stream<XHTMLDocument> applyInlineStyle(XHTMLDocument document, String css)
       throws IOException {
     document.addStyleSheet(new org.w3c.css.sac.InputSource(new StringReader(css)));
     document.selectNodes("//*").stream()
@@ -62,7 +62,7 @@ public class DefaultCssInliner implements CssInliner {
             element.addAttribute(STYLE, style.getCssText());
           }
         });
-    return Optional.of(document);
+    return Stream.of(document);
   }
 
 }
