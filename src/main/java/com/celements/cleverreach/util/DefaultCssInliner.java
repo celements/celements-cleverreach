@@ -39,7 +39,7 @@ public class DefaultCssInliner implements CssInliner {
     checkNotNull(css);
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
     try {
-      String result = Dom4JParser.createXHtmlParser()
+      String result = Dom4JParser.createXHtmlParser().allowDTDs()
           .readAndExecute(html, rethrowPredicate(document -> applyInlineStyle(document, css)))
           .orElseThrow(() -> new CssInlineException(html, null));
       LOGGER.trace("HTML with CSS INLINED [{}]", result);
