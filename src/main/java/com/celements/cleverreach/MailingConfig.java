@@ -3,6 +3,10 @@ package com.celements.cleverreach;
 import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Strings.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +14,10 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.tidy.Tidy;
 
 import com.celements.cleverreach.CleverReachService.ServerClass;
 import com.celements.cleverreach.exception.CssInlineException;
@@ -19,6 +27,8 @@ import com.xpn.xwiki.web.Utils;
 
 @Immutable
 public class MailingConfig {
+
+  private static Logger LOGGER = LoggerFactory.getLogger(MailingConfig.class);
 
   public static class Builder {
 
@@ -124,8 +134,27 @@ public class MailingConfig {
     return contentHtml;
   }
 
+  public @Nullable String getContentHtmlCleanXml() {
+    final Tidy tidy = new Tidy();
+    tidy.setInputEncoding(StandardCharsets.UTF_8.name());
+    tidy.setOutputEncoding(StandardCharsets.UTF_8.name());
+    tidy.setWraplen(Integer.MAX_VALUE);
+    tidy.setPrintBodyOnly(true);
+    tidy.setXmlOut(true);
+    tidy.setSmartIndent(false);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    String xml = "";
+    try {
+      tidy.parseDOM(new ByteArrayInputStream(getContentHtml().getBytes("UTF-8")), outputStream);
+      xml = outputStream.toString(StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException uee) {
+      LOGGER.warn("Encoding not available: {}", StandardCharsets.UTF_8.name(), uee);
+    }
+    return xml;
+  }
+
   public @Nullable String getContentHtmlCssInlined() throws CssInlineException {
-    return getCssInliner().inline(getContentHtml(), css);
+    return getCssInliner().inline(getContentHtmlCleanXml(), css);
   }
 
   public @Nullable String getContentPlain() {
