@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.celements.cleverreach.exception.CssInlineException;
 import com.celements.common.test.AbstractComponentTest;
 
 public class MailingConfigTest extends AbstractComponentTest {
@@ -60,6 +61,17 @@ public class MailingConfigTest extends AbstractComponentTest {
   public void testGetContentHtmlCleanXml() {
     setUpMailingConf("<div>&nbsp;</div>\n");
     assertEquals("<div>&#160;</div>\n", mailingConf.getContentHtmlCleanXml());
+  }
+
+  @Test
+  public void testGetContentHtmlCssInlined() throws Exception {
+    setUpMailingConf("<div>&nbsp;</div>\n");
+    try {
+      mailingConf.getContentHtmlCssInlined();
+    } catch (CssInlineException cie) {
+      // is expected not to throw an exception
+      throw cie;
+    }
   }
 
   private void setUpMailingConf(String html) {
