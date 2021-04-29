@@ -148,6 +148,8 @@ public class MailingConfig {
     try {
       tidy.parseDOM(new ByteArrayInputStream(getContentHtml().getBytes("UTF-8")), outputStream);
       xml = outputStream.toString(StandardCharsets.UTF_8.name());
+      LOGGER.trace("tidy.parseDOM: in length [{}], out length [{}]", getContentHtml().length(),
+          xml.length());
     } catch (UnsupportedEncodingException uee) {
       LOGGER.warn("Encoding not available: {}", StandardCharsets.UTF_8.name(), uee);
     }
@@ -156,8 +158,8 @@ public class MailingConfig {
 
   public @Nullable String getContentHtmlCssInlined() throws CssInlineException {
     String cleaned = getContentHtmlCleanXml();
-    LOGGER.trace("Original HTML [{}]", getContentHtml());
-    LOGGER.debug("Cleaned HTML ready to inline [{}]", cleaned);
+    LOGGER.trace("Original HTML contains &nbsp; [{}]", getContentHtml().indexOf("&nbsp;") >= 0);
+    LOGGER.debug("Cleaned HTML contains &nbsp; [{}]", cleaned.indexOf("&nbsp;") >= 0);
     return getCssInliner().inline(cleaned, css);
   }
 
