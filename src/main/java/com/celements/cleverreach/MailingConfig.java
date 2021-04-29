@@ -158,9 +158,13 @@ public class MailingConfig {
 
   public @Nullable String getContentHtmlCssInlined() throws CssInlineException {
     String cleaned = getContentHtmlCleanXml();
-    LOGGER.trace("Original HTML contains &nbsp; [{}]", getContentHtml().indexOf("&nbsp;") >= 0);
-    LOGGER.debug("Cleaned HTML contains &nbsp; [{}]", cleaned.indexOf("&nbsp;") >= 0);
     LOGGER.debug("Original and cleaned HTML are identical [{}]", cleaned.equals(getContentHtml()));
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Original HTML contains &nbsp; [{}]", getContentHtml().indexOf("&nbsp;") >= 0);
+      LOGGER.trace("Original HTML [{}]", getContentHtml());
+      LOGGER.trace("Cleaned HTML contains &nbsp; [{}]", cleaned.indexOf("&nbsp;") >= 0);
+      LOGGER.trace("Cleaned HTML [{}]", cleaned);
+    }
     return getCssInliner().inline(cleaned, css);
   }
 
