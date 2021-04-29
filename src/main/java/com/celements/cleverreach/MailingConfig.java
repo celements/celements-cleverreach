@@ -134,7 +134,7 @@ public class MailingConfig {
     return contentHtml;
   }
 
-  public @Nullable String getContentHtmlCleanXml() {
+  public String getContentHtmlCleanXml() {
     final Tidy tidy = new Tidy();
     tidy.setInputEncoding(StandardCharsets.UTF_8.name());
     tidy.setOutputEncoding(StandardCharsets.UTF_8.name());
@@ -160,6 +160,7 @@ public class MailingConfig {
     String cleaned = getContentHtmlCleanXml();
     LOGGER.trace("Original HTML contains &nbsp; [{}]", getContentHtml().indexOf("&nbsp;") >= 0);
     LOGGER.debug("Cleaned HTML contains &nbsp; [{}]", cleaned.indexOf("&nbsp;") >= 0);
+    LOGGER.debug("Original and cleaned HTML are identical [{}]", cleaned.equals(getContentHtml()));
     return getCssInliner().inline(cleaned, css);
   }
 
