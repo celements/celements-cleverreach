@@ -82,6 +82,14 @@ public class CssInlinerTest extends AbstractComponentTest {
         expect, 3));
   }
 
+  @Test
+  public void testInline_nbsp() throws Exception {
+    String simpleStyle = "div {\n  display: none;\n  padding-top: 3px;\n}";
+    String expect = "padding-top: 3px";
+    String result = cssInliner.inline(fileToString("/test_nbsp.html"), simpleStyle);
+    assertTrue(getExpectationMessage(expect, result), result.contains(expect));
+  }
+
   private boolean checkInResult(String result, String tag, String addition, String expect) {
     return checkInResult(result, tag, addition, expect, 1);
   }

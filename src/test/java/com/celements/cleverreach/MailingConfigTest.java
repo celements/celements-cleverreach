@@ -18,8 +18,7 @@ public class MailingConfigTest extends AbstractComponentTest {
 
   @Before
   public void setUp_MailingConfigTest() {
-    mailingConf = new MailingConfig.Builder().setId(DEFAULT_ID).setSubject(
-        DEFAULT_SUBJECT).setContentHtml(DEFAULT_HTML).setContentPlain(DEFAULT_PLAIN).build();
+    setUpMailingConf(DEFAULT_HTML);
   }
 
   @Test
@@ -55,6 +54,17 @@ public class MailingConfigTest extends AbstractComponentTest {
   @Test
   public void testGetContentPlain() {
     assertEquals(DEFAULT_PLAIN, mailingConf.getContentPlain());
+  }
+
+  @Test
+  public void testGetContentHtmlCleanXml() {
+    setUpMailingConf("<div>&nbsp;</div>\n");
+    assertEquals("<div>&#160;</div>\n", mailingConf.getContentHtmlCleanXml());
+  }
+
+  private void setUpMailingConf(String html) {
+    mailingConf = new MailingConfig.Builder().setId(DEFAULT_ID).setSubject(
+        DEFAULT_SUBJECT).setContentHtml(html).setContentPlain(DEFAULT_PLAIN).build();
   }
 
 }

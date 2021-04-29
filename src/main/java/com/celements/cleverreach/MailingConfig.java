@@ -141,6 +141,7 @@ public class MailingConfig {
     tidy.setWraplen(Integer.MAX_VALUE);
     tidy.setPrintBodyOnly(true);
     tidy.setXmlOut(true);
+    tidy.setQuoteNbsp(true);
     tidy.setSmartIndent(false);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     String xml = "";
