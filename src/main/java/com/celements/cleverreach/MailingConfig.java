@@ -155,7 +155,10 @@ public class MailingConfig {
   }
 
   public @Nullable String getContentHtmlCssInlined() throws CssInlineException {
-    return getCssInliner().inline(getContentHtmlCleanXml(), css);
+    String cleaned = getContentHtmlCleanXml();
+    LOGGER.trace("Original HTML [{}]", getContentHtml());
+    LOGGER.debug("Cleaned HTML ready to inline [{}]", cleaned);
+    return getCssInliner().inline(cleaned, css);
   }
 
   public @Nullable String getContentPlain() {
