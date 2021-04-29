@@ -146,7 +146,10 @@ public class MailingConfig {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     String xml = "";
     try {
-      tidy.parseDOM(new ByteArrayInputStream(getContentHtml().getBytes("UTF-8")), outputStream);
+      LOGGER.trace("string byte conversion equals [{}]", getContentHtml().equals(new String(
+          getContentHtml().getBytes("UTF-8"))));
+      tidy.parseDOM(new ByteArrayInputStream(getContentHtml().getBytes(
+          StandardCharsets.UTF_8.name())), outputStream);
       xml = outputStream.toString(StandardCharsets.UTF_8.name());
       LOGGER.trace("tidy.parseDOM: in length [{}], out length [{}]", getContentHtml().length(),
           xml.length());
@@ -165,6 +168,8 @@ public class MailingConfig {
       LOGGER.trace("Cleaned HTML contains &nbsp; [{}]", cleaned.indexOf("&nbsp;") >= 0);
       LOGGER.trace("Cleaned HTML [{}]", cleaned);
     }
+    // TODO remove workaround replacement used as quick fix
+    cleaned = cleaned.replaceAll("&nbsp;", "&#160;");
     return getCssInliner().inline(cleaned, css);
   }
 
