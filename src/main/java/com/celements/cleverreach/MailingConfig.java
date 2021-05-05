@@ -172,7 +172,7 @@ public class MailingConfig {
     // TODO remove "replaceAll-workaround" used as quick fix (PROZHP-106)
     String ininedContent = getCssInliner().inline(cleaned.replaceAll("&nbsp;", "&#160;"), css);
     return getContentHtml().replaceAll("(^.*<body>).*(</body>.*)$", "$1" + ininedContent.replaceAll(
-        "^<xml.*?>", "") + "$2");
+        "^<\\?xml.*?>", "") + "$2");
   }
 
   public @Nullable String getContentPlain() {

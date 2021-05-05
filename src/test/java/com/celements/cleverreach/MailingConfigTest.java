@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.celements.cleverreach.exception.CssInlineException;
 import com.celements.common.test.AbstractComponentTest;
 
 public class MailingConfigTest extends AbstractComponentTest {
@@ -70,14 +69,10 @@ public class MailingConfigTest extends AbstractComponentTest {
             + "Um auf <span class=\"link\">{EMAIL}</span> die Tagesagenda in Zukunft nicht mehr zu "
             + "erhalten können Sie sich <span class=\"link\"><a href=\"{UNSUBSCRIBE}\">hier "
             + "abmelden</a></span>.</p></div></body></html>");
-    try {
-      String expect = "<!DOCTYPE html><html";
-      String inlined = mailingConf.getContentHtmlCssInlined();
-      assertTrue(getExpectationMessage(expect, inlined), inlined.contains(expect));
-    } catch (CssInlineException cie) {
-      // is expected not to throw an exception
-      throw cie;
-    }
+    String expect = "<!DOCTYPE html><html";
+    String inlined = mailingConf.getContentHtmlCssInlined();
+    assertTrue(getExpectationMessage(expect, inlined), inlined.contains(expect));
+    assertFalse("Result contains [<?xml] and shouldn't ", inlined.contains("<?xml"));
   }
 
   private void setUpMailingConf(String html) {
