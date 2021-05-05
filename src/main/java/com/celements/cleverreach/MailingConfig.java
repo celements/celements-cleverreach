@@ -22,6 +22,7 @@ import org.w3c.tidy.Tidy;
 import com.celements.cleverreach.CleverReachService.ServerClass;
 import com.celements.cleverreach.exception.CssInlineException;
 import com.celements.cleverreach.util.CssInliner;
+import com.celements.logging.LogUtils;
 import com.google.common.base.Strings;
 import com.xpn.xwiki.web.Utils;
 
@@ -146,8 +147,6 @@ public class MailingConfig {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     String xml = "";
     try {
-      LOGGER.trace("string byte conversion equals [{}]", getContentHtml().equals(new String(
-          getContentHtml().getBytes("UTF-8"))));
       tidy.parseDOM(new ByteArrayInputStream(getContentHtml().getBytes(
           StandardCharsets.UTF_8.name())), outputStream);
       xml = outputStream.toString(StandardCharsets.UTF_8.name());
@@ -155,22 +154,23 @@ public class MailingConfig {
           xml.length());
     } catch (UnsupportedEncodingException uee) {
       LOGGER.warn("Encoding not available: {}", StandardCharsets.UTF_8.name(), uee);
+      throw new IllegalArgumentException(uee);
     }
     return xml;
   }
 
   public @Nullable String getContentHtmlCssInlined() throws CssInlineException {
-    String cleaned = getContentHtmlCleanXml();
-    LOGGER.debug("Original and cleaned HTML are identical [{}]", cleaned.equals(getContentHtml()));
+    final String cleaned = getContentHtmlCleanXml();
+    LOGGER.debug("Original and cleaned HTML are identical [{}]", LogUtils.defer(
+        () -> cleaned.equals(getContentHtml())));
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Original HTML contains &nbsp; [{}]", getContentHtml().indexOf("&nbsp;") >= 0);
       LOGGER.trace("Original HTML [{}]", getContentHtml());
       LOGGER.trace("Cleaned HTML contains &nbsp; [{}]", cleaned.indexOf("&nbsp;") >= 0);
       LOGGER.trace("Cleaned HTML [{}]", cleaned);
     }
-    // TODO remove workaround replacement used as quick fix
-    cleaned = cleaned.replaceAll("&nbsp;", "&#160;");
-    return getCssInliner().inline(cleaned, css);
+    // TODO remove "replaceAll-workaround" used as quick fix (PROZHP-106)
+    return getCssInliner().inline(cleaned.replaceAll("&nbsp;", "&#160;"), css);
   }
 
   public @Nullable String getContentPlain() {
