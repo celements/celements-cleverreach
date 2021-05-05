@@ -65,9 +65,11 @@ public class MailingConfigTest extends AbstractComponentTest {
 
   @Test
   public void testGetContentHtmlCssInlined() throws Exception {
-    setUpMailingConf("<div>&nbsp;</div>\n");
+    setUpMailingConf("<!DOCTYPE html><html><head></head><body><div>&nbsp;</div>\n</body></html>");
     try {
-      mailingConf.getContentHtmlCssInlined();
+      String expect = "<!DOCTYPE html><html";
+      String inlined = mailingConf.getContentHtmlCssInlined();
+      assertTrue(getExpectationMessage(expect, inlined), inlined.contains(expect));
     } catch (CssInlineException cie) {
       // is expected not to throw an exception
       throw cie;
@@ -77,6 +79,10 @@ public class MailingConfigTest extends AbstractComponentTest {
   private void setUpMailingConf(String html) {
     mailingConf = new MailingConfig.Builder().setId(DEFAULT_ID).setSubject(
         DEFAULT_SUBJECT).setContentHtml(html).setContentPlain(DEFAULT_PLAIN).build();
+  }
+
+  private String getExpectationMessage(String expected, String result) {
+    return "expected result to contain [" + expected + "], but was [" + result + "]";
   }
 
 }

@@ -51,6 +51,8 @@ public class CssInlinerTest extends AbstractComponentTest {
     String result = cssInliner.inline("<!DOCTYPE html><html><head></head><body><div></div></body>"
         + "</html>", simpleStyle);
     assertTrue(getExpectationMessage(expect, result), result.contains(expect));
+    String expect2 = "<!DOCTYPE html><html";
+    assertTrue(getExpectationMessage(expect2, result), result.contains(expect2));
   }
 
   @Test

@@ -2,6 +2,7 @@ package com.celements.cleverreach;
 
 import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Strings.*;
+import static java.text.MessageFormat.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -170,7 +171,9 @@ public class MailingConfig {
       LOGGER.trace("Cleaned HTML [{}]", cleaned);
     }
     // TODO remove "replaceAll-workaround" used as quick fix (PROZHP-106)
-    return getCssInliner().inline(cleaned.replaceAll("&nbsp;", "&#160;"), css);
+    String ininedContent = getCssInliner().inline(cleaned.replaceAll("&nbsp;", "&#160;"), css);
+    String htmlWrapper = getContentHtml().replaceAll("(^.*<body>).*(</body>.*)$", "$1{0}$2");
+    return format(htmlWrapper, ininedContent.replaceAll("^<xml.*?>", ""));
   }
 
   public @Nullable String getContentPlain() {
