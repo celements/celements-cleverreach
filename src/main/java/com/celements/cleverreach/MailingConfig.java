@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -30,6 +31,9 @@ import com.xpn.xwiki.web.Utils;
 public class MailingConfig {
 
   private static Logger LOGGER = LoggerFactory.getLogger(MailingConfig.class);
+
+  private static final Pattern HTML_HEADER_REGEX = Pattern.compile("^(.*<body>).*(</body>.*)$",
+      Pattern.DOTALL);
 
   public static class Builder {
 
@@ -171,8 +175,8 @@ public class MailingConfig {
     }
     // TODO remove "replaceAll-workaround" used as quick fix (PROZHP-106)
     String ininedContent = getCssInliner().inline(cleaned.replaceAll("&nbsp;", "&#160;"), css);
-    return getContentHtml().replaceAll("(^.*<body>).*(</body>.*)$", "$1" + ininedContent.replaceAll(
-        "^<\\?xml.*?>", "") + "$2");
+    String headerRemoved = ininedContent.replaceAll("^<\\?xml.*?>", "");
+    return HTML_HEADER_REGEX.matcher(getContentHtml()).replaceAll("$1" + headerRemoved + "$2");
   }
 
   public @Nullable String getContentPlain() {

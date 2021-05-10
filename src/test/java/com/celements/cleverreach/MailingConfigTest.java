@@ -73,6 +73,7 @@ public class MailingConfigTest extends AbstractComponentTest {
     String inlined = mailingConf.getContentHtmlCssInlined();
     assertTrue(getExpectationMessage(expect, inlined), inlined.contains(expect));
     assertFalse("Result contains [<?xml] and shouldn't ", inlined.contains("<?xml"));
+    assertTrue("Should contain 'style=', but is [" + inlined + "]", inlined.contains("style="));
   }
 
   private void setUpMailingConf(String html) {
