@@ -68,7 +68,7 @@ public class MailingConfigTest extends AbstractComponentTest {
         "<!DOCTYPE html><html><head></head><body><div><div>&nbsp;</div>\n<p class=\"unsubscribe\">"
             + "Um auf <span class=\"link\">{EMAIL}</span> die Tagesagenda in Zukunft nicht mehr zu "
             + "erhalten können Sie sich <span class=\"link\"><a href=\"{UNSUBSCRIBE}\">hier "
-            + "abmelden</a></span>.</p></div></body></html>");
+            + "abmelden</a></span>.<span>$hi</span></p></div></body></html>");
     String expect = "<!DOCTYPE html><html";
     String inlined = mailingConf.getContentHtmlCssInlined();
     assertTrue(getExpectationMessage(expect, inlined), inlined.contains(expect));

@@ -32,7 +32,8 @@ public class MailingConfig {
 
   private static Logger LOGGER = LoggerFactory.getLogger(MailingConfig.class);
 
-  private static final Pattern HTML_HEADER_REGEX = Pattern.compile("^(.*<body>).*(</body>.*)$",
+  private static final Pattern HTML_HEADER_REGEX = Pattern.compile("^(.*<body>).*", Pattern.DOTALL);
+  private static final Pattern HTML_FOOTER_REGEX = Pattern.compile(".*(</body>.*)$",
       Pattern.DOTALL);
 
   public static class Builder {
@@ -174,9 +175,11 @@ public class MailingConfig {
       LOGGER.trace("Cleaned HTML [{}]", cleaned);
     }
     // TODO remove "replaceAll-workaround" used as quick fix (PROZHP-106)
-    String ininedContent = getCssInliner().inline(cleaned.replaceAll("&nbsp;", "&#160;"), css);
-    String headerRemoved = ininedContent.replaceAll("^<\\?xml.*?>", "");
-    return HTML_HEADER_REGEX.matcher(getContentHtml()).replaceAll("$1" + headerRemoved + "$2");
+    String inlinedContent = getCssInliner().inline(cleaned.replaceAll("&nbsp;", "&#160;"), css);
+    String inlinedNoXmlHeader = inlinedContent.replaceAll("^<\\?xml.*?>", "");
+    String htmlHeader = HTML_HEADER_REGEX.matcher(getContentHtml()).replaceAll("$1");
+    String htmlFooter = HTML_FOOTER_REGEX.matcher(getContentHtml()).replaceAll("$1");
+    return htmlHeader + inlinedNoXmlHeader + htmlFooter;
   }
 
   public @Nullable String getContentPlain() {
