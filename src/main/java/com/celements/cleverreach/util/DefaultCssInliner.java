@@ -20,7 +20,7 @@ import io.sf.carte.doc.dom4j.CSSStylableElement;
 import io.sf.carte.doc.dom4j.XHTMLDocument;
 import io.sf.carte.doc.style.css.om.ComputedCSSStyle;
 
-@Component
+@Component("default")
 public class DefaultCssInliner implements CssInliner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCssInliner.class);
@@ -28,21 +28,19 @@ public class DefaultCssInliner implements CssInliner {
   private static final String STYLE = "style";
 
   @Override
-  public String inline(String html, List<String> cssList)
-      throws CssInlineException {
+  public String inline(String html, List<String> cssList) throws CssInlineException {
     return inline(html, String.join("\n", cssList));
   }
 
   @Override
-  public String inline(String html, String css)
-      throws CssInlineException {
+  public String inline(String html, String css) throws CssInlineException {
     checkNotNull(html);
     checkNotNull(css);
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
     try {
-      String result = Dom4JParser.createXHtmlParser().allowDTDs()
-          .readAndExecute(html, rethrowFunction(document -> applyInlineStyle(document, css)))
-          .orElseThrow(() -> new CssInlineException(html, null));
+      String result = Dom4JParser.createXHtmlParser().allowDTDs().readAndExecute(html,
+          rethrowFunction(document -> applyInlineStyle(document, css))).orElseThrow(
+              () -> new CssInlineException(html, null));
       LOGGER.trace("HTML with CSS INLINED [{}]", result);
       return result;
     } catch (IOException excp) {
@@ -54,9 +52,8 @@ public class DefaultCssInliner implements CssInliner {
   private Stream<XHTMLDocument> applyInlineStyle(XHTMLDocument document, String css)
       throws IOException {
     document.addStyleSheet(new org.w3c.css.sac.InputSource(new StringReader(css)));
-    document.selectNodes("//*").stream()
-        .flatMap(tryCast(CSSStylableElement.class))
-        .forEach(element -> {
+    document.selectNodes("//*").stream().flatMap(tryCast(CSSStylableElement.class)).forEach(
+        element -> {
           ComputedCSSStyle style = element.getComputedStyle();
           if (style.getLength() != 0) {
             element.addAttribute(STYLE, style.getCssText());
