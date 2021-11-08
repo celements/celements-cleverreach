@@ -40,11 +40,7 @@
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-core</artifactId>
-<<<<<<< HEAD
       <version>5.4-SNAPSHOT</version>
-=======
-      <version>5.2</version>
->>>>>>> refs/remotes/origin/dev
       <scope>provided</scope>
     </dependency>
     <dependency>
