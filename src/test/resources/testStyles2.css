@@ -49,3 +49,7 @@ body table#contentTable .column4.specialCell {
 html body {
   width: 123px;
 }
+
+body table#contentTable tr:first-child {
+  height: auto;
+}
