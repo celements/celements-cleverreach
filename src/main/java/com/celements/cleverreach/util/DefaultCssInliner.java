@@ -7,6 +7,7 @@ import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -29,11 +30,23 @@ public class DefaultCssInliner implements CssInliner {
 
   @Override
   public String inline(String html, List<String> cssList) throws CssInlineException {
-    return inline(html, String.join("\n", cssList));
+    return inline(html, cssList, null);
+  }
+
+  @Override
+  public String inline(String html, List<String> cssList, Map<String, String> configs)
+      throws CssInlineException {
+    return inline(html, String.join("\n", cssList), configs);
   }
 
   @Override
   public String inline(String html, String css) throws CssInlineException {
+    return inline(html, css, null);
+  }
+
+  @Override
+  public String inline(String html, String css, Map<String, String> configs)
+      throws CssInlineException {
     checkNotNull(html);
     checkNotNull(css);
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
