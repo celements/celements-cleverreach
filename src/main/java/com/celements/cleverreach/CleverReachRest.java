@@ -44,13 +44,9 @@ import com.celements.model.access.exception.DocumentNotExistsException;
 import com.celements.model.classes.ClassDefinition;
 import com.celements.model.context.ModelContext;
 import com.celements.model.object.xwiki.XWikiObjectFetcher;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.sun.syndication.io.impl.Base64;
-import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
-
-import com.celements.web.classes.KeyValueClass;
 
 @Component(CleverReachRest.COMPONENT_NAME)
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
@@ -70,7 +66,6 @@ public class CleverReachRest implements CleverReachService {
   static final String PATH_MAILINGS = "mailings.json/";
   static final String PATH_RECEIVERS = "receivers.json/";
   static final String SUBPATH_ATTRIBUTES = "/attributes";
-  static final String SUBPATH_CLONE = "/clone";
   static final String PATH_WHOAMI = "debug/whoami.json";
   static final String PATH_TTL = "debug/ttl.json";
 
@@ -134,63 +129,6 @@ public class CleverReachRest implements CleverReachService {
     return false;
   }
 
-  @Override
-  public boolean addReceiver(@NotNull String email, @Nullable String firstname, @Nullable String name) throws IOException {
-    checkArgument(!Strings.isNullOrEmpty(email), "Email connot be empty.");
-    //DONE 1. config besorgen (id "ID or email of the receiver to be cloned", target_group_id)
-    XWikiDocument configDoc = modelAccess.getDocument(getConfigDocRef());
-    Optional<String> cloneId = getConfigValueForKey(configDoc, "clone_mail_id");
-    checkArgument(cloneId.isPresent() && !Strings.isNullOrEmpty(cloneId.get().trim()),
-        "Clone ID not configured.");
-    Optional<String> targetGroupId = getConfigValueForKey(configDoc, "clone_target_group_id");
-    checkArgument(targetGroupId.isPresent() && !Strings.isNullOrEmpty(targetGroupId.get().trim()),
-        "Clone receiver group not configered");
-    //2. POST /v3/receivers.json/{id}/clone { "email": "...", "target_group_id": "...", "overwrite": "false" }
-    MultivaluedMap<String, String> cloneParams = new MultivaluedHashMap<>();
-    cloneParams.add("email", email);
-    cloneParams.add("target_group_id", targetGroupId.get());
-    cloneParams.add("overwrite", "false");
-    Response response = sendRestRequest(PATH_RECEIVERS + cloneId.get() + SUBPATH_CLONE, cloneParams,
-        SubmitMethod.POST);
-    LOGGER.info("Clone user response [{}]", response);
-    
-    
-    
-    if ((response != null) && response.hasEntity()) {
-      String content = response.readEntity(String.class);
-      LOGGER.info("Mailing update response content [{}]", content);
-      if (content.contains(mailingConf.getId()) && PATTERN_SUCCESS_RESP.matcher(content)
-          .matches()) {
-        return true;
-      }
-      LOGGER.warn("Mailing update not successful. Response content is [{}]", content);
-    } else {
-      LOGGER.warn("Mailing update failed with response [{}] and response hasEntity [{}]",
-          response, (response != null) && response.hasEntity());
-    }
-    //3. PUT /v3/receivers.json/{pool_id}/attributes/{id} { "value": "" } (pool_id = email address)
-    //4. nochmal 3. fuer vorname (oder nachname)
-    //5. deaktivieren auch ueber 3.?
-    //6. POST /v3/forms.json/{form_id}/send/{type}
-
-
-
-
-
-    if (updateMailingInternal(mailing)) {
-      Response response = sendRestRequest(PATH_RECEIVERS + mailing.getReferenceUserId()
-          + SUBPATH_ATTRIBUTES + "/" + mailing.getReferenceAttributeId(), new Value("1"),
-          SubmitMethod.PUT);
-      boolean isReadyToSend = isReadyToSendPut(response);
-      if (!isReadyToSend) {
-        failNotify.send("Update worked, but setting [ready to send] = true failed.",
-            new IllegalStateException("Setting ready to send flag failed"));
-      }
-      return isReadyToSend;
-    }
-    return false;
-  }
-
   private boolean updateMailingInternal(MailingConfig mailingConf) throws IOException {
     try {
       Response response = sendRestRequest(PATH_MAILINGS + mailingConf.getId(), buildMailing(
@@ -239,11 +177,6 @@ public class CleverReachRest implements CleverReachService {
         REST_CONFIG_SPACE_NAME, modelContext.getWikiRef()));
   }
 
-  Optional<String> getConfigValueForKey(XWikiDocument configDoc, String key) {
-    return XWikiObjectFetcher.on(configDoc).filter(KeyValueClass.FIELD_KEY,
-        key).fetchField(KeyValueClass.FIELD_VALUE).stream().findFirst();
-  }
-
   Response sendRestRequest(String path, Object data, SubmitMethod method) throws IOException {
     CleverReachConnection connection = getConnection();
     if (connection.isConnected()) {
@@ -259,8 +192,8 @@ public class CleverReachRest implements CleverReachService {
         return response;
       } else {
         String errorMailMsg = "Request response status != 200. Status [" + response.getStatus()
-            + "], Path [" + completePath + "], Method [" + method + "], Data ["+response+"], "
-            + "Response ["+data+"]";
+            + "], Path [" + completePath + "], Method [" + method + "], Data [" + response + "], "
+            + "Response [" + data + "]";
         LOGGER.info(errorMailMsg);
         String responseBody = RESPONSE_NO_BODY_LOGGING_MESSAGE;
         if (response.hasEntity()) {
