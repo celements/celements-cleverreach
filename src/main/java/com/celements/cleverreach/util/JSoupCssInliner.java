@@ -68,12 +68,24 @@ public class JSoupCssInliner implements CssInliner {
   @Override
   public @NotNull String inline(@NotNull String html, @NotNull List<String> cssList)
       throws CssInlineException {
+    return inline(html, cssList, null);
+  }
+
+  @Override
+  public @NotNull String inline(@NotNull String html, @NotNull List<String> cssList,
+      Map<String, String> configs) throws CssInlineException {
     return inline(html, String.join("\n", cssList));
   }
 
   @Override
   public @NotNull String inline(@NotNull String html, @NotNull String css)
       throws CssInlineException {
+    return inline(html, css, null);
+  }
+
+  @Override
+  public @NotNull String inline(@NotNull String html, @NotNull String css,
+      Map<String, String> configs) throws CssInlineException {
     final Document doc = Jsoup.parse(html);
     final Map<Element, Map<String, String>> eleStyles = new HashMap<>();
     for (final CSSStyleRule rule : buildRuleList(css)) {
@@ -91,7 +103,7 @@ public class JSoupCssInliner implements CssInliner {
     for (final Map.Entry<Element, Map<String, String>> entry : eleStyles.entrySet()) {
       final Element ele = entry.getKey();
       final StringBuilder b = new StringBuilder();
-       TODO support for !important
+      // TODO support for !important
       for (final Map.Entry<String, String> style : entry.getValue().entrySet()) {
         b.append(style.getKey()).append(":").append(style.getValue()).append(";");
       }
@@ -120,8 +132,9 @@ public class JSoupCssInliner implements CssInliner {
 
             @Override
             public void accept(String selector) {
-              CSSStyleRule splitStyle = styleRule; TODO --> clone CSStyleRule with reduced selector
-                                                  // (split by ,)
+              CSSStyleRule splitStyle = styleRule; // TODO --> clone CSStyleRule with reduced
+                                                   // selector
+                                                   // (split by ,)
               // Pseudo selectors like e.g. :hover cannot be inlined
               if (!styleRule.getSelectorText().contains(":")) {
                 rules.add(splitStyle);
