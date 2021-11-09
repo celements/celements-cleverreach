@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.xwiki.component.annotation.Component;
 
 import com.celements.cleverreach.exception.CssInlineException;
 import com.google.common.base.Strings;
+import com.google.common.hash.Hashing;
 
 @Component("synthon")
 public class SynthonCssInliner implements CssInliner {
@@ -31,6 +33,7 @@ public class SynthonCssInliner implements CssInliner {
   private static final Logger LOGGER = LoggerFactory.getLogger(SynthonCssInliner.class);
 
   private static final String SYNTHON_INLINE_URL = "http://synthon.srv-inter.net:31713/cssinline";
+  private static final String SERVER_SECRET = "sk/9N<JSct&^8PLn&5/KaW$uPcG$b:AZ";
 
   @Override
   public String inline(String html, List<String> cssList) throws CssInlineException {
@@ -62,7 +65,9 @@ public class SynthonCssInliner implements CssInliner {
     configs = (configs == null) ? Collections.emptyMap() : configs;
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
     try {
-      String postData = "html=" + URLEncoder.encode(merge(html, css), "UTF-8");
+      String encodedHtml = merge(html, css);
+      String postData = "secret=" + getHash(SERVER_SECRET + encodedHtml) + "&html=" + URLEncoder
+          .encode(encodedHtml, "UTF-8");
       if (configs.containsKey("removeClasses")) {
         postData = "removeClasses=" + configs.get("removeClasses") + "&" + postData;
       }
@@ -77,6 +82,10 @@ public class SynthonCssInliner implements CssInliner {
       LOGGER.warn("Failed to apply CSS [{}] to HTML [{}]", css, html, excp);
       throw new CssInlineException(html, excp);
     }
+  }
+
+  private String getHash(String inStr) {
+    return Hashing.sha256().hashString(inStr, StandardCharsets.UTF_8).toString();
   }
 
   private String inlineCss(byte[] postData, Map<String, String> configs) throws IOException,
