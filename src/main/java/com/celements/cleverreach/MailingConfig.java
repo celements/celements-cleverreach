@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Strings.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -36,6 +38,7 @@ public class MailingConfig {
     private String referenceGroupId;
     private String referenceAttributeId;
     private List<String> css = new ArrayList<>();
+    private Map<String, String> inlinerConfig = new HashMap<>();
 
     public Builder setId(@NotNull String id) {
       this.id = !isNullOrEmpty(id) ? id : null;
@@ -88,6 +91,13 @@ public class MailingConfig {
       return this;
     }
 
+    public Builder addInlinerConfig(@Nullable Map<String, String> config) {
+      if (config != null) {
+        inlinerConfig = config;
+      }
+      return this;
+    }
+
     public MailingConfig build() {
       return new MailingConfig(this);
     }
@@ -103,6 +113,7 @@ public class MailingConfig {
   private final String referenceGroupId;
   private final String referenceAttributeId;
   private final List<String> css;
+  private final Map<String, String> inlinerConfig;
 
   private MailingConfig(Builder builder) {
     checkArgument(!isNullOrEmpty(builder.id));
@@ -115,6 +126,7 @@ public class MailingConfig {
     referenceUserId = builder.referenceUserId;
     referenceGroupId = builder.referenceGroupId;
     referenceAttributeId = builder.referenceAttributeId;
+    inlinerConfig = builder.inlinerConfig;
   }
 
   public @NotNull String getId() {
@@ -130,7 +142,7 @@ public class MailingConfig {
   }
 
   public @Nullable String getContentHtmlCssInlined() throws CssInlineException {
-    return getCssInliner().inline(getContentHtml(), css);
+    return getCssInliner().inline(getContentHtml(), css, inlinerConfig);
   }
 
   public @Nullable String getContentPlain() {

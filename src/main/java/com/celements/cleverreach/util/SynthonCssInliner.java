@@ -32,8 +32,9 @@ public class SynthonCssInliner implements CssInliner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SynthonCssInliner.class);
 
-  private static final String SYNTHON_INLINE_URL = "http://synthon.srv-inter.net:31713/cssinline";
-  private static final String SERVER_SECRET = "sk/9N<JSct&^8PLn&5/KaW$uPcG$b:AZ";
+  public static final String CONFIG_KEY_INLINE_URL = "inlineUrl";
+  public static final String CONFIG_KEY_SERVER_SECRET = "serverSecret";
+  public static final String CONFIG_KEY_REMOVE_CLASSES = "removeClasses";
 
   @Override
   public String inline(String html, List<String> cssList) throws CssInlineException {
@@ -66,10 +67,15 @@ public class SynthonCssInliner implements CssInliner {
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
     try {
       String encodedHtml = merge(html, css);
-      String postData = "secret=" + getHash(SERVER_SECRET + encodedHtml) + "&html=" + URLEncoder
-          .encode(encodedHtml, "UTF-8");
-      if (configs.containsKey("removeClasses")) {
-        postData = "removeClasses=" + configs.get("removeClasses") + "&" + postData;
+      if (!configs.containsKey(CONFIG_KEY_SERVER_SECRET)) {
+        throw new CssInlineException(encodedHtml, new RuntimeException("Server secret for synthon "
+            + "serveris missing in config"));
+      }
+      String postData = "secret=" + getHash(configs.get(CONFIG_KEY_SERVER_SECRET) + encodedHtml)
+          + "&html=" + URLEncoder
+              .encode(encodedHtml, "UTF-8");
+      if (configs.containsKey(CONFIG_KEY_REMOVE_CLASSES)) {
+        postData = "removeClasses=" + configs.get(CONFIG_KEY_REMOVE_CLASSES) + "&" + postData;
       }
       String result = inlineCss(postData.getBytes(), configs);
       LOGGER.trace("HTML with CSS INLINED [{}]", result);
@@ -110,8 +116,11 @@ public class SynthonCssInliner implements CssInliner {
   private HttpURLConnection prepareConnection(Map<String, String> configs) throws IOException,
       MalformedURLException,
       ProtocolException {
-    String url = configs.containsKey("inlineUrl") ? configs.get("inlineUrl") : SYNTHON_INLINE_URL;
-    HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+    if (!configs.containsKey(CONFIG_KEY_INLINE_URL)) {
+      throw new MalformedURLException("URL to inline service is missing in config");
+    }
+    HttpURLConnection conn = (HttpURLConnection) new URL(configs.get(CONFIG_KEY_INLINE_URL))
+        .openConnection();
     conn.setRequestMethod("POST");
     conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
     conn.setRequestProperty("Accept", "application/json");
