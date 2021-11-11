@@ -63,7 +63,7 @@ public class SynthonCssInlinerTest extends AbstractComponentTest {
   @Test
   public void testInline_styleFiles() throws Exception {
     Map<String, String> config = new HashMap<>();
-    config.put("removeClasses", Boolean.FALSE.toString());
+    config.put(SynthonCssInliner.CONFIG_KEY_REMOVE_CLASSES, Boolean.FALSE.toString());
     // Use to create a new inline using the synthon server
     // String result = cssInliner.inline(fileToString("/test.html"), Arrays.asList(fileToString(
     // "/testStyles1.css"), fileToString("/testStyles2.css")), config);
