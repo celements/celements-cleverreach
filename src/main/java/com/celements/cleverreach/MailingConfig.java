@@ -92,7 +92,7 @@ public class MailingConfig {
       return this;
     }
 
-    public Builder addInlinerComponent(@NotEmpty String inlinerComponentName) {
+    public Builder setInlinerComponent(@NotEmpty String inlinerComponentName) {
       checkArgument(!Strings.isNullOrEmpty(inlinerComponentName));
       inlinerComponent = inlinerComponentName;
       return this;
@@ -100,7 +100,7 @@ public class MailingConfig {
 
     public Builder addInlinerConfig(@Nullable Map<String, String> config) {
       if (config != null) {
-        inlinerConfig = config;
+        inlinerConfig.putAll(config);
       }
       return this;
     }

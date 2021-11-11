@@ -2,8 +2,6 @@ package com.celements.cleverreach;
 
 import static org.junit.Assert.*;
 
-import java.util.regex.Pattern;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,25 +56,15 @@ public class MailingConfigTest extends AbstractComponentTest {
     assertEquals(DEFAULT_PLAIN, mailingConf.getContentPlain());
   }
 
-  @Test
-  public void testGetContentHtmlCssInlined() throws Exception {
-    setUpMailingConf(
-        "<!DOCTYPE html><html><head></head><body><style>.link { color:#ff0; }</style><div><div>"
-            + "&nbsp;</div>\n<p class=\"unsubscribe\">Um auf <span class=\\\"link\\\">{EMAIL}"
-            + "</span> die Tagesagenda in Zukunft nicht mehr zu erhalten können Sie sich <span "
-            + "class=\"link\"><a href=\"{UNSUBSCRIBE}\">hier abmelden</a></span>.<span>$hi</span>"
-            + "</p></div></body></html>");
-    String expect = "^<!DOCTYPE html>[\\s\\S]*<html[\\s\\S]*";
-    String inlined = mailingConf.getContentHtmlCssInlined();
-    assertTrue(getExpectationMessage(expect, inlined), Pattern.compile(expect,
-        Pattern.CASE_INSENSITIVE).matcher(inlined).matches());
-    assertFalse("Result contains [<?xml] and shouldn't ", inlined.contains("<?xml"));
-    assertTrue("Should contain 'style=', but is [" + inlined + "]", inlined.contains("style="));
-  }
-
   private void setUpMailingConf(String html) {
     mailingConf = new MailingConfig.Builder().setId(DEFAULT_ID).setSubject(
         DEFAULT_SUBJECT).setContentHtml(html).setContentPlain(DEFAULT_PLAIN).build();
+  }
+
+  private void setUpMailingConf(String html, String inlinerComponentName) {
+    mailingConf = new MailingConfig.Builder().setId(DEFAULT_ID).setSubject(
+        DEFAULT_SUBJECT).setContentHtml(html).setContentPlain(DEFAULT_PLAIN).setInlinerComponent(
+            inlinerComponentName).build();
   }
 
   private String getExpectationMessage(String expected, String result) {
