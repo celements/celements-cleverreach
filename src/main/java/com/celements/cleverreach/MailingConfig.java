@@ -38,6 +38,7 @@ public class MailingConfig {
     private String referenceGroupId;
     private String referenceAttributeId;
     private List<String> css = new ArrayList<>();
+    private String inlinerComponent = "synthon"; // default inliner is "synthon"
     private Map<String, String> inlinerConfig = new HashMap<>();
 
     public Builder setId(@NotNull String id) {
@@ -91,6 +92,12 @@ public class MailingConfig {
       return this;
     }
 
+    public Builder addInlinerComponent(@NotEmpty String inlinerComponentName) {
+      checkArgument(!Strings.isNullOrEmpty(inlinerComponentName));
+      inlinerComponent = inlinerComponentName;
+      return this;
+    }
+
     public Builder addInlinerConfig(@Nullable Map<String, String> config) {
       if (config != null) {
         inlinerConfig = config;
@@ -113,6 +120,7 @@ public class MailingConfig {
   private final String referenceGroupId;
   private final String referenceAttributeId;
   private final List<String> css;
+  private final String inlinerComponent;
   private final Map<String, String> inlinerConfig;
 
   private MailingConfig(Builder builder) {
@@ -126,6 +134,7 @@ public class MailingConfig {
     referenceUserId = builder.referenceUserId;
     referenceGroupId = builder.referenceGroupId;
     referenceAttributeId = builder.referenceAttributeId;
+    inlinerComponent = builder.inlinerComponent;
     inlinerConfig = builder.inlinerConfig;
   }
 
@@ -170,6 +179,6 @@ public class MailingConfig {
   }
 
   private CssInliner getCssInliner() {
-    return Utils.getComponent(CssInliner.class, "synthon");
+    return Utils.getComponent(CssInliner.class, inlinerComponent);
   }
 }
