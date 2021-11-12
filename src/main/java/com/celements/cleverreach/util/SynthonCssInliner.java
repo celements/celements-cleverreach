@@ -36,6 +36,8 @@ public class SynthonCssInliner implements CssInliner {
   public static final String CONFIG_KEY_SERVER_SECRET = "serverSecret";
   public static final String CONFIG_KEY_REMOVE_CLASSES = "removeClasses";
 
+  public final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   @Override
   public String inline(String html, List<String> cssList) throws CssInlineException {
     return inline(html, cssList, null);
@@ -79,7 +81,7 @@ public class SynthonCssInliner implements CssInliner {
       }
       String result = inlineCss(postData.getBytes(), configs);
       LOGGER.trace("HTML with CSS INLINED [{}]", result);
-      Inlined inlinedResult = new ObjectMapper().readValue(result, Inlined.class);
+      Inlined inlinedResult = OBJECT_MAPPER.readValue(result, Inlined.class);
       if (inlinedResult.success) {
         return inlinedResult.data;
       }
