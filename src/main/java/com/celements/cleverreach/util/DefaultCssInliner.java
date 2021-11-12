@@ -51,9 +51,9 @@ public class DefaultCssInliner implements CssInliner {
     checkNotNull(css);
     LOGGER.trace("Applying the following CSS [{}] to HTML [{}]", css, html);
     try {
-      String result = Dom4JParser.createXHtmlParser().allowDTDs().readAndExecute(html,
-          rethrowFunction(document -> applyInlineStyle(document, css))).orElseThrow(
-              () -> new CssInlineException(html, null));
+      String result = Dom4JParser.createXHtmlParser().allowDTDs()
+          .readAndExecute(html, rethrowFunction(document -> applyInlineStyle(document, css)))
+          .orElseThrow(() -> new CssInlineException(html, null));
       LOGGER.trace("HTML with CSS INLINED [{}]", result);
       return result;
     } catch (IOException excp) {
@@ -65,8 +65,9 @@ public class DefaultCssInliner implements CssInliner {
   private Stream<XHTMLDocument> applyInlineStyle(XHTMLDocument document, String css)
       throws IOException {
     document.addStyleSheet(new org.w3c.css.sac.InputSource(new StringReader(css)));
-    document.selectNodes("//*").stream().flatMap(tryCast(CSSStylableElement.class)).forEach(
-        element -> {
+    document.selectNodes("//*").stream()
+        .flatMap(tryCast(CSSStylableElement.class))
+        .forEach(element -> {
           ComputedCSSStyle style = element.getComputedStyle();
           if (style.getLength() != 0) {
             element.addAttribute(STYLE, style.getCssText());
