@@ -109,8 +109,7 @@ public class SynthonCssInliner implements CssInliner {
         resultBuilder.append(line);
       }
     }
-    String result = resultBuilder.toString();
-    return result;
+    return resultBuilder.toString();
   }
 
   private HttpURLConnection prepareConnection(Map<String, String> configs) throws IOException,
