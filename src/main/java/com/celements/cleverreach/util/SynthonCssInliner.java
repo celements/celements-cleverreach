@@ -130,6 +130,8 @@ public class SynthonCssInliner implements CssInliner {
   private String merge(String html, String css) {
     if (!Strings.isNullOrEmpty(css)) {
       String[] sect;
+      // The ?= (zero-width positive lookahead) is used to split but keep 
+	    // the matched part. Else it would necessary to readd it later.
       if (html.contains("</head>")) {
         sect = html.split("(?=</head>)", 2);
       } else if (html.contains("</body>")) {
