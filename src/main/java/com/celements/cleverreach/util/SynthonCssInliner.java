@@ -68,8 +68,8 @@ public class SynthonCssInliner implements CssInliner {
     try {
       String encodedHtml = merge(html, css);
       if (!configs.containsKey(CONFIG_KEY_SERVER_SECRET)) {
-        throw new CssInlineException(encodedHtml, new RuntimeException("Server secret for synthon "
-            + "serveris missing in config"));
+        throw new CssInlineException(encodedHtml, "Server secret for synthon serveris missing in "
+            + "config");
       }
       String postData = "secret=" + getHash(configs.get(CONFIG_KEY_SERVER_SECRET) + encodedHtml)
           + "&html=" + URLEncoder
@@ -83,7 +83,7 @@ public class SynthonCssInliner implements CssInliner {
       if (inlinedResult.success) {
         return inlinedResult.data;
       }
-      throw new CssInlineException(html, new RuntimeException(inlinedResult.error));
+      throw new CssInlineException(html, inlinedResult.error);
     } catch (IOException excp) {
       LOGGER.warn("Failed to apply CSS [{}] to HTML [{}]", css, html, excp);
       throw new CssInlineException(html, excp);
@@ -130,8 +130,8 @@ public class SynthonCssInliner implements CssInliner {
   private String merge(String html, String css) {
     if (!Strings.isNullOrEmpty(css)) {
       String[] sect;
-      // The ?= (zero-width positive lookahead) is used to split but keep 
-	    // the matched part. Else it would necessary to readd it later.
+      // The ?= (zero-width positive lookahead) is used to split but keep
+      // the matched part. Else it would necessary to readd it later.
       if (html.contains("</head>")) {
         sect = html.split("(?=</head>)", 2);
       } else if (html.contains("</body>")) {
