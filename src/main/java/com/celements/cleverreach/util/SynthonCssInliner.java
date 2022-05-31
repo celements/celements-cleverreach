@@ -62,7 +62,7 @@ public class SynthonCssInliner implements CssInliner {
    *                inlineUrl - the URL where the inline service can be reached
    *                serverSecret - the server secret used to authorize the inline request
    *                optional:
-   *                removeClasses [true|false] - remove classes from the HTML after inlining (default: false)
+   *                removeClasses [true|false] - remove classes from the HTML after inlining (default: true)
    * @return        the html with the css inlined
    */
   @Override
